@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -133,12 +135,29 @@ public class AlbumController {
     }
 
     @GetMapping("/{albumId}/capa/{capaId}/presigned-url")
-    @Operation(summary = "Obter URL pré-assinada", description = "Gera URL pré-assinada para acesso à capa (expira em 30 minutos)")
+    @Operation(summary = "Obter URL da capa", description = "Retorna URL do backend para acesso à capa")
     public ResponseEntity<PresignedUrlResponse> getPresignedUrl(
             @PathVariable Long albumId,
             @PathVariable Long capaId) {
         PresignedUrlResponse response = minIOService.getPresignedUrl(albumId, capaId);
         return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/{albumId}/capa/{capaId}/image")
+    @Operation(summary = "Obter imagem da capa", description = "Retorna a imagem da capa do álbum")
+    public ResponseEntity<InputStreamResource> getCapaImage(
+            @PathVariable Long albumId,
+            @PathVariable Long capaId) {
+        MinIOService.FileData fileData = minIOService.getCapaFile(albumId, capaId);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(fileData.getContentType()));
+        headers.setContentLength(fileData.getSize());
+        headers.setCacheControl("public, max-age=3600");
+        
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(new InputStreamResource(fileData.getInputStream()));
     }
 }
 

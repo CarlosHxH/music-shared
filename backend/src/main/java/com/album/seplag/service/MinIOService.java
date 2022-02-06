@@ -19,12 +19,13 @@ import com.album.seplag.repository.ArtistaRepository;
 import com.album.seplag.repository.CapaAlbumRepository;
 
 import io.minio.BucketExistsArgs;
-import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.GetObjectArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
-import io.minio.http.Method;
+import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -70,6 +71,59 @@ public class MinIOService {
         }
     }
 
+    /**
+     * Obtém o arquivo do MinIO como InputStream junto com seu contentType
+     */
+    public FileData getFile(String objectName) {
+        try {
+            StatObjectResponse stat = minioClient.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectName)
+                            .build()
+            );
+            
+            InputStream inputStream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectName)
+                            .build()
+            );
+            
+            return new FileData(inputStream, stat.contentType(), stat.size());
+        } catch (Exception e) {
+            log.error("Erro ao obter arquivo do MinIO: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro ao obter arquivo do MinIO", e);
+        }
+    }
+    
+    /**
+     * Classe interna para retornar dados do arquivo
+     */
+    public static class FileData {
+        private final InputStream inputStream;
+        private final String contentType;
+        private final long size;
+        
+        public FileData(InputStream inputStream, String contentType, long size) {
+            this.inputStream = inputStream;
+            this.contentType = contentType;
+            this.size = size;
+        }
+        
+        public InputStream getInputStream() {
+            return inputStream;
+        }
+        
+        public String getContentType() {
+            return contentType;
+        }
+        
+        public long getSize() {
+            return size;
+        }
+    }
+
     @Transactional
     public CapaAlbum uploadCapa(Long albumId, MultipartFile file) {
         log.info("Fazendo upload de capa para álbum ID: {}, arquivo: {}", albumId, file.getOriginalFilename());
@@ -108,7 +162,7 @@ public class MinIOService {
     }
 
     public PresignedUrlResponse getPresignedUrl(Long albumId, Long capaId) {
-        log.debug("Gerando URL pré-assinada para capa ID: {}, álbum ID: {}", capaId, albumId);
+        log.debug("Gerando URL do backend para capa ID: {}, álbum ID: {}", capaId, albumId);
         try {
             CapaAlbum capa = capaAlbumRepository.findById(capaId)
                     .orElseThrow(() -> new ResourceNotFoundException("Capa não encontrada com id: " + capaId));
@@ -118,23 +172,31 @@ public class MinIOService {
                 throw new ResourceNotFoundException("Capa não pertence ao álbum especificado");
             }
 
-            String url = minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Method.GET)
-                            .bucket(bucketName)
-                            .object(capa.getNomeArquivo())
-                            .expiry((int) (presignedUrlExpiration / 1000))
-                            .build()
-            );
+            // Retorna URL do endpoint do backend que faz proxy para o MinIO
+            String url = "/api/v1/albuns/" + albumId + "/capa/" + capaId + "/image";
 
-            log.debug("URL pré-assinada gerada com sucesso para capa ID: {}", capaId);
+            log.debug("URL gerada com sucesso para capa ID: {}", capaId);
             return new PresignedUrlResponse(url, presignedUrlExpiration);
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Erro ao gerar URL pré-assinada para capa ID {}: {}", capaId, e.getMessage(), e);
-            throw new RuntimeException("Erro ao gerar URL pré-assinada", e);
+            log.error("Erro ao gerar URL para capa ID {}: {}", capaId, e.getMessage(), e);
+            throw new RuntimeException("Erro ao gerar URL", e);
         }
+    }
+    
+    /**
+     * Obtém o arquivo da capa do álbum
+     */
+    public FileData getCapaFile(Long albumId, Long capaId) {
+        CapaAlbum capa = capaAlbumRepository.findById(capaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Capa não encontrada com id: " + capaId));
+
+        if (!capa.getAlbum().getId().equals(albumId)) {
+            throw new ResourceNotFoundException("Capa não pertence ao álbum especificado");
+        }
+
+        return getFile(capa.getNomeArquivo());
     }
 
     @Transactional
@@ -170,7 +232,7 @@ public class MinIOService {
     }
 
     public PresignedUrlResponse getPresignedUrlFotoArtista(Long artistaId) {
-        log.debug("Gerando URL pré-assinada para foto do artista ID: {}", artistaId);
+        log.debug("Gerando URL do backend para foto do artista ID: {}", artistaId);
         Artista artista = artistaRepository.findById(artistaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + artistaId));
 
@@ -178,22 +240,25 @@ public class MinIOService {
             throw new ResourceNotFoundException("Artista não possui foto cadastrada");
         }
 
-        try {
-            String url = minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Method.GET)
-                            .bucket(bucketName)
-                            .object(artista.getFotoNomeArquivo())
-                            .expiry((int) (presignedUrlExpiration / 1000))
-                            .build()
-            );
+        // Retorna URL do endpoint do backend que faz proxy para o MinIO
+        String url = "/api/v1/artistas/" + artistaId + "/foto/image";
 
-            log.debug("URL pré-assinada gerada com sucesso para foto do artista ID: {}", artistaId);
-            return new PresignedUrlResponse(url, presignedUrlExpiration);
-        } catch (Exception e) {
-            log.error("Erro ao gerar URL pré-assinada para foto do artista ID {}: {}", artistaId, e.getMessage(), e);
-            throw new RuntimeException("Erro ao gerar URL pré-assinada da foto", e);
+        log.debug("URL gerada com sucesso para foto do artista ID: {}", artistaId);
+        return new PresignedUrlResponse(url, presignedUrlExpiration);
+    }
+    
+    /**
+     * Obtém o arquivo da foto do artista
+     */
+    public FileData getFotoArtistaFile(Long artistaId) {
+        Artista artista = artistaRepository.findById(artistaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + artistaId));
+
+        if (artista.getFotoNomeArquivo() == null || artista.getFotoNomeArquivo().isBlank()) {
+            throw new ResourceNotFoundException("Artista não possui foto cadastrada");
         }
+
+        return getFile(artista.getFotoNomeArquivo());
     }
 
     @Transactional

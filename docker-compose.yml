@@ -48,6 +48,7 @@ services:
       SPRING_DATASOURCE_USERNAME: seplag_user
       SPRING_DATASOURCE_PASSWORD: seplag_pass
       MINIO_ENDPOINT: http://minio:9000
+      MINIO_PUBLIC_ENDPOINT: http://localhost:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
       JWT_SECRET: ${JWT_SECRET:-seplag-secret-key-change-in-production}
