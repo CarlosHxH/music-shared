@@ -3,6 +3,8 @@ package com.album.seplag.controller;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -115,10 +117,25 @@ public class ArtistaController {
     }
 
     @GetMapping("/{id}/foto/presigned-url")
-    @Operation(summary = "URL da foto", description = "Retorna URL pré-assinada para exibir a foto (404 se não houver)")
+    @Operation(summary = "URL da foto", description = "Retorna URL do backend para exibir a foto (404 se não houver)")
     public ResponseEntity<PresignedUrlResponse> getPresignedUrlFoto(@PathVariable Long id) {
         PresignedUrlResponse response = minIOService.getPresignedUrlFotoArtista(id);
         return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/{id}/foto/image")
+    @Operation(summary = "Obter foto do artista", description = "Retorna a imagem da foto do artista")
+    public ResponseEntity<InputStreamResource> getFotoImage(@PathVariable Long id) {
+        MinIOService.FileData fileData = minIOService.getFotoArtistaFile(id);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(fileData.getContentType()));
+        headers.setContentLength(fileData.getSize());
+        headers.setCacheControl("public, max-age=3600");
+        
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(new InputStreamResource(fileData.getInputStream()));
     }
 }
 

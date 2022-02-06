@@ -71,7 +71,9 @@ public class SecurityConfig {
             "/actuator/health/**",
             "/csrf",
             "/",
-            "/ws/**"  // WebSocket SockJS handshake (SockJS não envia JWT em headers)
+            "/ws/**",  // WebSocket SockJS handshake (SockJS não envia JWT em headers)
+            apiBasePath + "/artistas/*/foto/image",  // Endpoint público para fotos de artistas
+            apiBasePath + "/albuns/*/capa/*/image"  // Endpoint público para capas de álbuns
         };
     }
 
