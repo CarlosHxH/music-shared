@@ -3,7 +3,6 @@ package com.album.seplag.config;
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,11 +14,13 @@ import java.util.Map;
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
 
-    @Autowired
-    private Map<String, Bucket> rateLimitBuckets;
+    private final Map<String, Bucket> rateLimitBuckets;
+    private final RateLimitConfig rateLimitConfig;
 
-    @Autowired
-    private RateLimitConfig rateLimitConfig;
+    public RateLimitInterceptor(Map<String, Bucket> rateLimitBuckets, RateLimitConfig rateLimitConfig) {
+        this.rateLimitBuckets = rateLimitBuckets;
+        this.rateLimitConfig = rateLimitConfig;
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -46,4 +47,3 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
     }
 }
-
