@@ -9,6 +9,7 @@ import com.album.seplag.model.Usuario;
 import com.album.seplag.repository.AlbumRepository;
 import com.album.seplag.repository.ArtistaRepository;
 import com.album.seplag.repository.UsuarioRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class AlbumService {
 
@@ -57,23 +59,31 @@ public class AlbumService {
 
     @Transactional
     public AlbumDTO create(Album album) {
-        Artista artista = artistaRepository.findById(album.getArtista().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + album.getArtista().getId()));
-        
-        // Obter usuário autenticado
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + username));
-        
-        album.setArtista(artista);
-        album.setUsuario(usuario);
-        Album saved = albumRepository.save(album);
-        
-        // Notificar via WebSocket
-        messagingTemplate.convertAndSend("/topic/albuns", toDTO(saved));
-        
-        return toDTO(saved);
+        log.info("Criando novo álbum: {}", album.getTitulo());
+        try {
+            Artista artista = artistaRepository.findById(album.getArtista().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + album.getArtista().getId()));
+            
+            // Obter usuário autenticado
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            Usuario usuario = usuarioRepository.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + username));
+            
+            album.setArtista(artista);
+            album.setUsuario(usuario);
+            Album saved = albumRepository.save(album);
+            
+            log.info("Álbum criado com sucesso - ID: {}, Título: {}", saved.getId(), saved.getTitulo());
+            
+            // Notificar via WebSocket
+            messagingTemplate.convertAndSend("/topic/albuns", toDTO(saved));
+            
+            return toDTO(saved);
+        } catch (Exception e) {
+            log.error("Erro ao criar álbum: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Transactional
@@ -94,28 +104,34 @@ public class AlbumService {
         return toDTO(saved);
     }
 
+    @Transactional
+    public void delete(Long id) {
+        log.info("Deletando álbum com ID: {}", id);
+        Album album = albumRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Álbum não encontrado com id: " + id));
+        albumRepository.delete(album);
+        log.info("Álbum deletado com sucesso - ID: {}", id);
+    }
+
     private AlbumDTO toDTO(Album album) {
-        AlbumDTO dto = new AlbumDTO();
-        dto.setId(album.getId());
-        dto.setTitulo(album.getTitulo());
-        dto.setArtistaId(album.getArtista().getId());
-        dto.setArtistaNome(album.getArtista().getNome());
-        dto.setDataLancamento(album.getDataLancamento());
-        dto.setCreatedAt(album.getCreatedAt());
-        
-        dto.setCapas(album.getCapas().stream()
-                .map(capa -> {
-                    CapaAlbumDTO capaDTO = new CapaAlbumDTO();
-                    capaDTO.setId(capa.getId());
-                    capaDTO.setNomeArquivo(capa.getNomeArquivo());
-                    capaDTO.setContentType(capa.getContentType());
-                    capaDTO.setTamanho(capa.getTamanho());
-                    capaDTO.setDataUpload(capa.getDataUpload());
-                    return capaDTO;
-                })
-                .collect(Collectors.toList()));
-        
-        return dto;
+        return new AlbumDTO(
+            album.getId(),
+            album.getTitulo(),
+            album.getArtista().getId(),
+            album.getArtista().getNome(),
+            album.getDataLancamento(),
+            album.getCreatedAt(),
+            album.getCapas().stream()
+                .map(capa -> new CapaAlbumDTO(
+                    capa.getId(),
+                    capa.getNomeArquivo(),
+                    capa.getContentType(),
+                    capa.getTamanho(),
+                    capa.getDataUpload(),
+                    null // presignedUrl será preenchido quando necessário
+                ))
+                .collect(Collectors.toList())
+        );
     }
 }
 

@@ -5,6 +5,7 @@ import com.album.seplag.dto.LoginRequest;
 import com.album.seplag.dto.LoginResponse;
 import com.album.seplag.model.Usuario;
 import com.album.seplag.repository.UsuarioRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class UsuarioService implements UserDetailsService {
 
@@ -31,10 +33,15 @@ public class UsuarioService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.info("Carregando usuário: {}", username);
         Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
+                .orElseThrow(() -> {
+                    log.info("Usuário não encontrado: {}", username);
+                    return new UsernameNotFoundException("Usuário não encontrado: " + username);
+                });
 
         if (!usuario.getAtivo()) {
+            log.info("Tentativa de login com usuário inativo: {}", username);
             throw new UsernameNotFoundException("Usuário inativo: " + username);
         }
 
@@ -49,32 +56,44 @@ public class UsuarioService implements UserDetailsService {
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
+        log.info("Tentativa de login para usuário: {}", request.username());
         try {
-            UserDetails userDetails = loadUserByUsername(request.getUsername());
+            UserDetails userDetails = loadUserByUsername(request.username());
 
-            if (!passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
+            if (!passwordEncoder.matches(request.password(), userDetails.getPassword())) {
+                log.info("Senha inválida para usuário: {}", request.username());
                 throw new RuntimeException("Credenciais inválidas");
             }
 
             String token = jwtConfig.generateToken(userDetails.getUsername());
+            log.info("Login bem-sucedido para usuário: {}", request.username());
             return new LoginResponse(token, "Bearer", jwtConfig.getExpiration());
         } catch (UsernameNotFoundException e) {
+            log.info("Falha no login - usuário não encontrado: {}", request.username());
             throw new RuntimeException("Credenciais inválidas");
         }
     }
 
     @Transactional
     public LoginResponse refreshToken(String token) {
-        String username = jwtConfig.getUsernameFromToken(token);
-        
-        if (jwtConfig.validateToken(token, username)) {
-            // Verificar se o usuário ainda existe
-            loadUserByUsername(username);
-            String newToken = jwtConfig.generateToken(username);
-            return new LoginResponse(newToken, "Bearer", jwtConfig.getExpiration());
-        }
+        log.info("Renovando token JWT");
+        try {
+            String username = jwtConfig.getUsernameFromToken(token);
+            
+            if (jwtConfig.validateToken(token, username)) {
+                // Verificar se o usuário ainda existe
+                loadUserByUsername(username);
+                String newToken = jwtConfig.generateToken(username);
+                log.info("Token renovado com sucesso para usuário: {}", username);
+                return new LoginResponse(newToken, "Bearer", jwtConfig.getExpiration());
+            }
 
-        throw new RuntimeException("Token inválido ou expirado");
+            log.info("Token inválido ou expirado");
+            throw new RuntimeException("Token inválido ou expirado");
+        } catch (Exception e) {
+            log.info("Erro ao renovar token: {}", e.getMessage(), e);
+            throw new RuntimeException("Token inválido ou expirado", e);
+        }
     }
 }
 

@@ -4,11 +4,13 @@ import com.album.seplag.dto.ArtistaDTO;
 import com.album.seplag.exception.ResourceNotFoundException;
 import com.album.seplag.model.Artista;
 import com.album.seplag.repository.ArtistaRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class ArtistaService {
 
@@ -56,15 +58,24 @@ public class ArtistaService {
         return toDTO(saved);
     }
 
+    @Transactional
+    public void delete(Long id) {
+        log.info("Deletando artista com ID: {}", id);
+        Artista artista = artistaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + id));
+        artistaRepository.delete(artista);
+        log.info("Artista deletado com sucesso - ID: {}", id);
+    }
+
     private ArtistaDTO toDTO(Artista artista) {
-        ArtistaDTO dto = new ArtistaDTO();
-        dto.setId(artista.getId());
-        dto.setNome(artista.getNome());
-        dto.setGenero(artista.getGenero());
-        dto.setBiografia(artista.getBiografia());
-        dto.setCreatedAt(artista.getCreatedAt());
-        dto.setQuantidadeAlbuns((long) artista.getAlbuns().size());
-        return dto;
+        return new ArtistaDTO(
+            artista.getId(),
+            artista.getNome(),
+            artista.getGenero(),
+            artista.getBiografia(),
+            artista.getCreatedAt(),
+            (long) artista.getAlbuns().size()
+        );
     }
 }
 
