@@ -1,6 +1,8 @@
 package com.album.seplag.service;
 
+import com.album.seplag.dto.ArtistaCreateDTO;
 import com.album.seplag.dto.ArtistaDTO;
+import com.album.seplag.dto.ArtistaUpdateDTO;
 import com.album.seplag.exception.ResourceNotFoundException;
 import com.album.seplag.model.Artista;
 import com.album.seplag.repository.ArtistaRepository;
@@ -41,19 +43,23 @@ public class ArtistaService {
     }
 
     @Transactional
-    public ArtistaDTO create(Artista artista) {
+    public ArtistaDTO create(ArtistaCreateDTO dto) {
+        Artista artista = new Artista();
+        artista.setNome(dto.nome());
+        artista.setGenero(dto.genero());
+        artista.setBiografia(dto.biografia());
         Artista saved = artistaRepository.save(artista);
         return toDTO(saved);
     }
 
     @Transactional
-    public ArtistaDTO update(Long id, Artista artistaAtualizado) {
+    public ArtistaDTO update(Long id, ArtistaUpdateDTO dto) {
         Artista artista = artistaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + id));
         
-        artista.setNome(artistaAtualizado.getNome());
-        artista.setGenero(artistaAtualizado.getGenero());
-        artista.setBiografia(artistaAtualizado.getBiografia());
+        artista.setNome(dto.nome());
+        artista.setGenero(dto.genero());
+        artista.setBiografia(dto.biografia());
         Artista saved = artistaRepository.save(artista);
         return toDTO(saved);
     }

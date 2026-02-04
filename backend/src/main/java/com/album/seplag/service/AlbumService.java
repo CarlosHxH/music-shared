@@ -1,6 +1,8 @@
 package com.album.seplag.service;
 
+import com.album.seplag.dto.AlbumCreateDTO;
 import com.album.seplag.dto.AlbumDTO;
+import com.album.seplag.dto.AlbumUpdateDTO;
 import com.album.seplag.dto.CapaAlbumDTO;
 import com.album.seplag.exception.ResourceNotFoundException;
 import com.album.seplag.model.Album;
@@ -58,18 +60,20 @@ public class AlbumService {
     }
 
     @Transactional
-    public AlbumDTO create(Album album) {
-        log.info("Criando novo álbum: {}", album.getTitulo());
+    public AlbumDTO create(AlbumCreateDTO dto) {
+        log.info("Criando novo álbum: {}", dto.titulo());
         try {
-            Artista artista = artistaRepository.findById(album.getArtista().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + album.getArtista().getId()));
+            Artista artista = artistaRepository.findById(dto.artistaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + dto.artistaId()));
             
-            // Obter usuário autenticado
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
             Usuario usuario = usuarioRepository.findByUsername(username)
                     .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + username));
             
+            Album album = new Album();
+            album.setTitulo(dto.titulo());
+            album.setDataLancamento(dto.dataLancamento());
             album.setArtista(artista);
             album.setUsuario(usuario);
             Album saved = albumRepository.save(album);
@@ -87,18 +91,16 @@ public class AlbumService {
     }
 
     @Transactional
-    public AlbumDTO update(Long id, Album albumAtualizado) {
+    public AlbumDTO update(Long id, AlbumUpdateDTO dto) {
         Album album = albumRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Álbum não encontrado com id: " + id));
         
-        album.setTitulo(albumAtualizado.getTitulo());
-        album.setDataLancamento(albumAtualizado.getDataLancamento());
+        album.setTitulo(dto.titulo());
+        album.setDataLancamento(dto.dataLancamento());
         
-        if (albumAtualizado.getArtista() != null && albumAtualizado.getArtista().getId() != null) {
-            Artista artista = artistaRepository.findById(albumAtualizado.getArtista().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + albumAtualizado.getArtista().getId()));
-            album.setArtista(artista);
-        }
+        Artista artista = artistaRepository.findById(dto.artistaId())
+                .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com id: " + dto.artistaId()));
+        album.setArtista(artista);
         
         Album saved = albumRepository.save(album);
         return toDTO(saved);
