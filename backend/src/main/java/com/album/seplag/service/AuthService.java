@@ -67,15 +67,17 @@ public class AuthService {
         try {
             String username = jwtConfig.getUsernameFromToken(token);
 
-            if (!jwtConfig.validateToken(token, username)) {
-                log.info("Token inválido ou expirado");
+            if (!jwtConfig.validateRefreshToken(token, username)) {
+                log.info("Refresh token inválido ou expirado");
                 throw new InvalidTokenException();
             }
 
-            userDetailsService.loadUserByUsername(username);
-            String newToken = jwtConfig.generateToken(username);
+            var usuario = usuarioService.findByUsername(username);
+            List<String> roles = usuario.roles() != null ? List.copyOf(usuario.roles()) : List.of();
+            String newAccessToken = jwtConfig.generateAccessToken(username, roles);
+            String newRefreshToken = jwtConfig.generateRefreshToken(username);
             log.info("Token renovado com sucesso para usuário: {}", username);
-            return new LoginResponse(newToken, "Bearer", jwtConfig.getExpiration());
+            return new LoginResponse(newAccessToken, newRefreshToken, jwtConfig.getExpiration());
         } catch (InvalidTokenException e) {
             throw e;
         } catch (Exception e) {

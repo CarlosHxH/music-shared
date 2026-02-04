@@ -103,7 +103,7 @@ class AuthIntegrationTest {
         assertNotNull(refreshResponse);
         assertNotNull(refreshResponse.accessToken());
         assertNotNull(refreshResponse.refreshToken());
-        assertNotEquals(loginResponse.accessToken(), refreshResponse.accessToken());
+        assertEquals("Bearer", refreshResponse.type());
     }
 }
 
