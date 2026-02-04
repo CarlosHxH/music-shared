@@ -1,6 +1,6 @@
 package com.album.seplag.controller;
 
-import com.album.seplag.model.Regional;
+import com.album.seplag.dto.RegionalDTO;
 import com.album.seplag.service.RegionalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,8 +22,8 @@ public class RegionalController {
 
     @GetMapping
     @Operation(summary = "Listar regionais", description = "Lista todas as regionais sincronizadas")
-    public ResponseEntity<List<Regional>> findAll() {
-        List<Regional> regionais = regionalService.findAll();
+    public ResponseEntity<List<RegionalDTO>> findAll() {
+        List<RegionalDTO> regionais = regionalService.findAll();
         return ResponseEntity.ok(regionais);
     }
 

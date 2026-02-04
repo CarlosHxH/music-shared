@@ -2,8 +2,10 @@ package com.album.seplag.integration;
 
 import com.album.seplag.dto.LoginRequest;
 import com.album.seplag.dto.LoginResponse;
+import com.album.seplag.exception.InvalidCredentialsException;
 import com.album.seplag.model.Usuario;
 import com.album.seplag.repository.UsuarioRepository;
+import com.album.seplag.service.AuthService;
 import com.album.seplag.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Transactional
 class AuthIntegrationTest {
+
+    @Autowired
+    private AuthService authService;
 
     @Autowired
     private UsuarioService usuarioService;
@@ -48,7 +53,7 @@ class AuthIntegrationTest {
     void login_ShouldReturnToken_WhenCredentialsAreValid() {
         LoginRequest request = new LoginRequest("testuser", "password123");
 
-        LoginResponse response = usuarioService.login(request);
+        LoginResponse response = authService.login(request);
 
         assertNotNull(response);
         assertNotNull(response.token());
@@ -60,8 +65,8 @@ class AuthIntegrationTest {
     void login_ShouldThrowException_WhenCredentialsAreInvalid() {
         LoginRequest request = new LoginRequest("testuser", "wrongpassword");
 
-        assertThrows(RuntimeException.class, () -> {
-            usuarioService.login(request);
+        assertThrows(InvalidCredentialsException.class, () -> {
+            authService.login(request);
         });
     }
 

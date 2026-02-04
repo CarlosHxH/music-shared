@@ -1,5 +1,6 @@
 package com.album.seplag.service;
 
+import com.album.seplag.dto.RegionalDTO;
 import com.album.seplag.model.Regional;
 import com.album.seplag.repository.RegionalRepository;
 import org.slf4j.Logger;
@@ -104,8 +105,19 @@ public class RegionalService {
     }
 
     @Transactional(readOnly = true)
-    public List<Regional> findAll() {
-        return regionalRepository.findAll();
+    public List<RegionalDTO> findAll() {
+        return regionalRepository.findAll().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    private RegionalDTO toDTO(Regional r) {
+        return new RegionalDTO(
+                r.getId(),
+                r.getNome(),
+                r.getAtivo(),
+                r.getDataSincronizacao()
+        );
     }
 }
 

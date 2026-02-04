@@ -3,9 +3,9 @@ package com.album.seplag.controller;
 import com.album.seplag.dto.AlbumCreateDTO;
 import com.album.seplag.dto.AlbumDTO;
 import com.album.seplag.dto.AlbumUpdateDTO;
+import com.album.seplag.dto.CapaAlbumDTO;
 import com.album.seplag.dto.PageResponseDTO;
 import com.album.seplag.dto.PresignedUrlResponse;
-import com.album.seplag.model.CapaAlbum;
 import com.album.seplag.service.AlbumService;
 import com.album.seplag.service.MinIOService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -108,7 +108,7 @@ public class AlbumController {
 
     @PostMapping("/{id}/capa")
     @Operation(summary = "Upload de capa", description = "Faz upload de uma ou mais capas para o álbum")
-    public ResponseEntity<List<CapaAlbum>> uploadCapa(
+    public ResponseEntity<List<CapaAlbumDTO>> uploadCapa(
             @PathVariable Long id,
             @Parameter(
                 description = "Arquivos de imagem para upload",
@@ -116,11 +116,7 @@ public class AlbumController {
                 content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
             )
             @RequestParam("files") MultipartFile[] files) {
-        List<CapaAlbum> capas = new java.util.ArrayList<>();
-        for (MultipartFile file : files) {
-            CapaAlbum capa = minIOService.uploadCapa(id, file);
-            capas.add(capa);
-        }
+        List<CapaAlbumDTO> capas = albumService.uploadCapas(id, files);
         return ResponseEntity.status(HttpStatus.CREATED).body(capas);
     }
 

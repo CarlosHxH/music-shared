@@ -7,6 +7,7 @@ import com.album.seplag.dto.CapaAlbumDTO;
 import com.album.seplag.exception.ResourceNotFoundException;
 import com.album.seplag.model.Album;
 import com.album.seplag.model.Artista;
+import com.album.seplag.model.CapaAlbum;
 import com.album.seplag.model.Usuario;
 import com.album.seplag.repository.AlbumRepository;
 import com.album.seplag.repository.ArtistaRepository;
@@ -19,7 +20,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -115,6 +119,27 @@ public class AlbumService {
         log.info("Álbum deletado com sucesso - ID: {}", id);
     }
 
+    @Transactional
+    public List<CapaAlbumDTO> uploadCapas(Long albumId, MultipartFile[] files) {
+        List<CapaAlbumDTO> result = new ArrayList<>();
+        for (MultipartFile file : files) {
+            CapaAlbum capa = minIOService.uploadCapa(albumId, file);
+            result.add(toCapaDTO(capa));
+        }
+        return result;
+    }
+
+    private CapaAlbumDTO toCapaDTO(CapaAlbum capa) {
+        return new CapaAlbumDTO(
+                capa.getId(),
+                capa.getNomeArquivo(),
+                capa.getContentType(),
+                capa.getTamanho(),
+                capa.getDataUpload(),
+                null
+        );
+    }
+
     private AlbumDTO toDTO(Album album) {
         return new AlbumDTO(
             album.getId(),
@@ -124,14 +149,7 @@ public class AlbumService {
             album.getDataLancamento(),
             album.getCreatedAt(),
             album.getCapas().stream()
-                .map(capa -> new CapaAlbumDTO(
-                    capa.getId(),
-                    capa.getNomeArquivo(),
-                    capa.getContentType(),
-                    capa.getTamanho(),
-                    capa.getDataUpload(),
-                    null // presignedUrl será preenchido quando necessário
-                ))
+                .map(this::toCapaDTO)
                 .collect(Collectors.toList())
         );
     }

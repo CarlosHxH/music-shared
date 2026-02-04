@@ -1,9 +1,11 @@
 package com.album.seplag.service;
 
 import com.album.seplag.dto.AlbumDTO;
+import com.album.seplag.dto.CapaAlbumDTO;
 import com.album.seplag.exception.ResourceNotFoundException;
 import com.album.seplag.model.Album;
 import com.album.seplag.model.Artista;
+import com.album.seplag.model.CapaAlbum;
 import com.album.seplag.model.Usuario;
 import com.album.seplag.repository.AlbumRepository;
 import com.album.seplag.repository.ArtistaRepository;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -126,6 +129,29 @@ class AlbumServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> {
             albumService.delete(1L);
         });
+    }
+
+    @Test
+    void uploadCapas_ShouldReturnListOfCapaAlbumDTO() {
+        MultipartFile file = mock(MultipartFile.class);
+
+        CapaAlbum capa = new CapaAlbum();
+        capa.setId(1L);
+        capa.setNomeArquivo("albuns/1/uuid_capa.jpg");
+        capa.setContentType("image/jpeg");
+        capa.setTamanho(1024L);
+        capa.setDataUpload(LocalDateTime.now());
+        capa.setAlbum(album);
+
+        when(minIOService.uploadCapa(1L, file)).thenReturn(capa);
+
+        List<CapaAlbumDTO> result = albumService.uploadCapas(1L, new MultipartFile[]{file});
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).id());
+        assertEquals("albuns/1/uuid_capa.jpg", result.get(0).nomeArquivo());
+        verify(minIOService).uploadCapa(1L, file);
     }
 }
 
