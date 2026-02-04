@@ -3,6 +3,7 @@ package com.album.seplag.controller;
 import com.album.seplag.dto.ErrorResponse;
 import com.album.seplag.dto.LoginRequest;
 import com.album.seplag.dto.LoginResponse;
+import com.album.seplag.dto.UsuarioRegisterDTO;
 import com.album.seplag.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +31,13 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "Registro", description = "Registro público de novo usuário. Retorna token JWT (login automático)")
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody UsuarioRegisterDTO request) {
+        LoginResponse response = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/refresh")

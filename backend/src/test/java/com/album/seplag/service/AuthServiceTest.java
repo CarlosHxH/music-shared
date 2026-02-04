@@ -8,7 +8,6 @@ import com.album.seplag.exception.InvalidTokenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.User;
@@ -32,7 +31,9 @@ class AuthServiceTest {
     @Mock
     private JwtConfig jwtConfig;
 
-    @InjectMocks
+    @Mock
+    private UsuarioService usuarioService;
+
     private AuthService authService;
 
     private UserDetails userDetails;
@@ -44,6 +45,7 @@ class AuthServiceTest {
                 .password("encodedPassword")
                 .roles("USER")
                 .build();
+        authService = new AuthService(userDetailsService, passwordEncoder, jwtConfig, usuarioService);
     }
 
     @Test
@@ -53,6 +55,7 @@ class AuthServiceTest {
         when(passwordEncoder.matches("password", userDetails.getPassword())).thenReturn(true);
         when(jwtConfig.generateToken("testuser")).thenReturn("jwt-token");
         when(jwtConfig.getExpiration()).thenReturn(300000L);
+        doNothing().when(usuarioService).atualizarLastLogin("testuser");
 
         LoginResponse response = authService.login(request);
 

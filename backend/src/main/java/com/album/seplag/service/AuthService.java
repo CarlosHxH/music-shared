@@ -3,6 +3,7 @@ package com.album.seplag.service;
 import com.album.seplag.config.JwtConfig;
 import com.album.seplag.dto.LoginRequest;
 import com.album.seplag.dto.LoginResponse;
+import com.album.seplag.dto.UsuarioRegisterDTO;
 import com.album.seplag.exception.InvalidCredentialsException;
 import com.album.seplag.exception.InvalidTokenException;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +20,16 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final JwtConfig jwtConfig;
+    private final UsuarioService usuarioService;
 
     public AuthService(UserDetailsService userDetailsService,
                       PasswordEncoder passwordEncoder,
-                      JwtConfig jwtConfig) {
+                      JwtConfig jwtConfig,
+                      UsuarioService usuarioService) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
         this.jwtConfig = jwtConfig;
+        this.usuarioService = usuarioService;
     }
 
     @Transactional(readOnly = true)
@@ -40,6 +44,7 @@ public class AuthService {
             }
 
             String token = jwtConfig.generateToken(userDetails.getUsername());
+            usuarioService.atualizarLastLogin(request.username());
             log.info("Login bem-sucedido para usuário: {}", request.username());
             return new LoginResponse(token, "Bearer", jwtConfig.getExpiration());
         } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
@@ -69,5 +74,14 @@ public class AuthService {
             log.info("Erro ao renovar token: {}", e.getMessage(), e);
             throw new InvalidTokenException();
         }
+    }
+
+    @Transactional
+    public LoginResponse register(UsuarioRegisterDTO dto) {
+        usuarioService.register(dto);
+        usuarioService.atualizarLastLogin(dto.username());
+        String token = jwtConfig.generateToken(dto.username());
+        log.info("Registro e login automático para usuário: {}", dto.username());
+        return new LoginResponse(token, "Bearer", jwtConfig.getExpiration());
     }
 }

@@ -2,6 +2,7 @@ package com.album.seplag.integration;
 
 import com.album.seplag.dto.LoginRequest;
 import com.album.seplag.dto.LoginResponse;
+import com.album.seplag.dto.UsuarioRegisterDTO;
 import com.album.seplag.exception.InvalidCredentialsException;
 import com.album.seplag.model.Usuario;
 import com.album.seplag.repository.UsuarioRepository;
@@ -45,7 +46,7 @@ class AuthIntegrationTest {
         usuario.setPassword(passwordEncoder.encode("password123"));
         usuario.setEmail("test@example.com");
         usuario.setAtivo(true);
-        usuario.setRoles(Set.of("ROLE_USER"));
+        usuario.setRoles(new java.util.HashSet<>(Set.of("ROLE_USER")));
         usuarioRepository.save(usuario);
     }
 
@@ -76,6 +77,19 @@ class AuthIntegrationTest {
 
         assertNotNull(userDetails);
         assertEquals("testuser", userDetails.getUsername());
+    }
+
+    @Test
+    void register_ShouldReturnToken_WhenDataIsValid() {
+        var request = new UsuarioRegisterDTO("newuser", "password123", "newuser@example.com");
+
+        LoginResponse response = authService.register(request);
+
+        assertNotNull(response);
+        assertNotNull(response.token());
+        assertEquals("Bearer", response.type());
+        assertNotNull(response.expiresIn());
+        assertTrue(usuarioRepository.findByUsername("newuser").isPresent());
     }
 }
 

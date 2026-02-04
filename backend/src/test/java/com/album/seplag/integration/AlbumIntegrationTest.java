@@ -56,7 +56,7 @@ class AlbumIntegrationTest {
         usuario.setPassword(passwordEncoder.encode("password123"));
         usuario.setEmail("test@example.com");
         usuario.setAtivo(true);
-        usuario.setRoles(Set.of("ROLE_USER"));
+        usuario.setRoles(new java.util.HashSet<>(Set.of("ROLE_USER")));
         usuario = usuarioRepository.save(usuario);
 
         artista = new Artista();
