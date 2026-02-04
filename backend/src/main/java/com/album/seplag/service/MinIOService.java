@@ -121,6 +121,8 @@ public class MinIOService {
 
             log.debug("URL pré-assinada gerada com sucesso para capa ID: {}", capaId);
             return new PresignedUrlResponse(url, presignedUrlExpiration);
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Erro ao gerar URL pré-assinada para capa ID {}: {}", capaId, e.getMessage(), e);
             throw new RuntimeException("Erro ao gerar URL pré-assinada", e);

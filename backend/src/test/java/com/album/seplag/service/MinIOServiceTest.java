@@ -11,10 +11,8 @@ import io.minio.MinioClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
@@ -41,7 +39,6 @@ class MinIOServiceTest {
     @Mock
     private MultipartFile multipartFile;
 
-    @InjectMocks
     private MinIOService minIOService;
 
     private Album album;
@@ -50,14 +47,11 @@ class MinIOServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        // Configurar mocks estáticos
         when(minIOConfig.minioClient()).thenReturn(minioClient);
         when(minioClient.bucketExists(any())).thenReturn(true);
-        
-        // Usar ReflectionTestUtils para injetar valores privados
-        ReflectionTestUtils.setField(minIOService, "minioClient", minioClient);
-        ReflectionTestUtils.setField(minIOService, "bucketName", "album-covers");
-        ReflectionTestUtils.setField(minIOService, "presignedUrlExpiration", 1800000L);
+
+        minIOService = new MinIOService(minIOConfig, "test-bucket", 1800000L,
+                albumRepository, capaAlbumRepository);
 
         artista = new Artista();
         artista.setId(1L);
