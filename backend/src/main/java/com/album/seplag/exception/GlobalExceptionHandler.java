@@ -1,6 +1,7 @@
 package com.album.seplag.exception;
 
 import com.album.seplag.dto.ErrorResponse;
+import com.album.seplag.validation.SortPropertyValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -63,8 +64,8 @@ public class GlobalExceptionHandler {
             PropertyReferenceException ex,
             HttpServletRequest request) {
         String path = request.getRequestURI();
-        String entityType = detectEntityType(path);
-        String validProperties = getValidPropertiesForEntity(entityType);
+        String entityType = SortPropertyValidator.getEntityTypeFromPath(path);
+        String validProperties = SortPropertyValidator.getValidPropertiesForEntity(entityType);
         
         String message = String.format(
             "Propriedade de ordenação inválida: '%s'. Propriedades válidas para %s: %s",
@@ -81,6 +82,34 @@ public class GlobalExceptionHandler {
             request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(
+            InvalidCredentialsException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+            Instant.now(),
+            HttpStatus.UNAUTHORIZED.value(),
+            "Unauthorized",
+            ex.getMessage(),
+            request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidToken(
+            InvalidTokenException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+            Instant.now(),
+            HttpStatus.UNAUTHORIZED.value(),
+            "Unauthorized",
+            ex.getMessage(),
+            request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)
@@ -107,23 +136,14 @@ public class GlobalExceptionHandler {
             RuntimeException ex,
             HttpServletRequest request) {
         String message = ex.getMessage();
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        String error = "Bad Request";
-        
-        if (message != null && (message.contains("Credenciais inválidas") || message.contains("não encontrado"))) {
-            status = HttpStatus.UNAUTHORIZED;
-            error = "Unauthorized";
-            message = "Credenciais inválidas";
-        }
-        
         ErrorResponse errorResponse = new ErrorResponse(
             Instant.now(),
-            status.value(),
-            error,
+            HttpStatus.BAD_REQUEST.value(),
+            "Bad Request",
             message != null ? message : "Erro ao processar requisição",
             request.getRequestURI()
         );
-        return ResponseEntity.status(status).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
@@ -138,25 +158,5 @@ public class GlobalExceptionHandler {
             request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
-
-    private String detectEntityType(String path) {
-        if (path.contains("/artistas")) {
-            return "Artista";
-        } else if (path.contains("/albuns")) {
-            return "Album";
-        }
-        return "a entidade";
-    }
-
-    private String getValidPropertiesForEntity(String entityType) {
-        switch (entityType) {
-            case "Artista":
-                return "id, nome, genero, createdAt, updatedAt";
-            case "Album":
-                return "id, titulo, dataLancamento, createdAt, updatedAt";
-            default:
-                return "consulte a documentação da API";
-        }
     }
 }

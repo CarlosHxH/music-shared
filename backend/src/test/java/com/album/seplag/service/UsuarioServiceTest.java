@@ -1,8 +1,5 @@
 package com.album.seplag.service;
 
-import com.album.seplag.config.JwtConfig;
-import com.album.seplag.dto.LoginRequest;
-import com.album.seplag.dto.LoginResponse;
 import com.album.seplag.model.Usuario;
 import com.album.seplag.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.Set;
@@ -26,12 +22,6 @@ class UsuarioServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private JwtConfig jwtConfig;
 
     @InjectMocks
     private UsuarioService usuarioService;
@@ -78,33 +68,6 @@ class UsuarioServiceTest {
 
         assertThrows(UsernameNotFoundException.class, () -> {
             usuarioService.loadUserByUsername("testuser");
-        });
-    }
-
-    @Test
-    void login_ShouldReturnLoginResponse_WhenCredentialsAreValid() {
-        LoginRequest request = new LoginRequest("testuser", "password");
-        when(usuarioRepository.findByUsername("testuser")).thenReturn(Optional.of(usuario));
-        when(passwordEncoder.matches("password", usuario.getPassword())).thenReturn(true);
-        when(jwtConfig.generateToken("testuser")).thenReturn("jwt-token");
-        when(jwtConfig.getExpiration()).thenReturn(300000L);
-
-        LoginResponse response = usuarioService.login(request);
-
-        assertNotNull(response);
-        assertEquals("jwt-token", response.token());
-        assertEquals("Bearer", response.type());
-        verify(jwtConfig).generateToken("testuser");
-    }
-
-    @Test
-    void login_ShouldThrowException_WhenPasswordIsInvalid() {
-        LoginRequest request = new LoginRequest("testuser", "wrongpassword");
-        when(usuarioRepository.findByUsername("testuser")).thenReturn(Optional.of(usuario));
-        when(passwordEncoder.matches("wrongpassword", usuario.getPassword())).thenReturn(false);
-
-        assertThrows(RuntimeException.class, () -> {
-            usuarioService.login(request);
         });
     }
 }
