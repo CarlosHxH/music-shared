@@ -53,12 +53,12 @@ public class GlobalExceptionHandler {
         
         ErrorResponse error = new ErrorResponse(
             Instant.now(),
-            HttpStatus.BAD_REQUEST.value(),
-            "Erro de Validação",
+            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+            "Unprocessable Entity",
             message,
             request.getRequestURI()
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
     }
 
     @ExceptionHandler(PropertyReferenceException.class)
