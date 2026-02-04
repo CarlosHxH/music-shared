@@ -76,8 +76,8 @@ services:
       network: host
     container_name: seplag-frontend
     environment:
-      VITE_API_URL: ${VITE_API_URL:http://localhost:8080/api/v1}
-      VITE_WS_URL: ${VITE_WS_URL:ws://localhost:8080/ws}
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api/v1}
+      VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:8080/ws}
     ports:
       - "3000:80"
     depends_on:
