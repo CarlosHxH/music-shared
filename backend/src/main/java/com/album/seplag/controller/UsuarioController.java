@@ -1,6 +1,7 @@
 package com.album.seplag.controller;
 
 import com.album.seplag.dto.*;
+import com.album.seplag.enums.SortDirection;
 import com.album.seplag.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -62,12 +63,10 @@ public class UsuarioController {
             @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "Campo para ordenação")
             @RequestParam(defaultValue = "id") String sort,
-            @Parameter(description = "Direção da ordenação (asc ou desc)")
-            @RequestParam(defaultValue = "asc") String direction) {
+            @Parameter(description = "Direção da ordenação")
+            @RequestParam(defaultValue = "ASC") SortDirection direction) {
 
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+        Sort.Direction sortDirection = direction == SortDirection.DESC ? Sort.Direction.DESC : Sort.Direction.ASC;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
         return ResponseEntity.ok(PageResponseDTO.of(usuarioService.findAll(pageable)));

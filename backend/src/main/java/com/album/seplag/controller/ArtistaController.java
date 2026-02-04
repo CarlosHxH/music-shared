@@ -5,6 +5,7 @@ import com.album.seplag.dto.ArtistaDTO;
 import com.album.seplag.dto.ArtistaUpdateDTO;
 import com.album.seplag.dto.PageResponseDTO;
 import com.album.seplag.dto.PresignedUrlResponse;
+import com.album.seplag.enums.SortDirection;
 import com.album.seplag.service.ArtistaService;
 import com.album.seplag.service.MinIOService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,12 +46,10 @@ public class ArtistaController {
             @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "Campo para ordenação")
             @RequestParam(defaultValue = "nome") String sort,
-            @Parameter(description = "Direção da ordenação (asc ou desc)")
-            @RequestParam(defaultValue = "asc") String direction) {
+            @Parameter(description = "Direção da ordenação")
+            @RequestParam(defaultValue = "ASC") SortDirection direction) {
         
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+        Sort.Direction sortDirection = direction == SortDirection.DESC ? Sort.Direction.DESC : Sort.Direction.ASC;
         
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
         return ResponseEntity.ok(PageResponseDTO.of(artistaService.findAll(nome, pageable)));

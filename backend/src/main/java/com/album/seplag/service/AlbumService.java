@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -130,12 +131,15 @@ public class AlbumService {
     }
 
     private CapaAlbumDTO toCapaDTO(CapaAlbum capa) {
+        var dataUpload = capa.getDataUpload() != null
+                ? capa.getDataUpload().atZone(ZoneId.systemDefault()).toInstant()
+                : null;
         return new CapaAlbumDTO(
                 capa.getId(),
                 capa.getNomeArquivo(),
                 capa.getContentType(),
                 capa.getTamanho(),
-                capa.getDataUpload(),
+                dataUpload,
                 null
         );
     }
