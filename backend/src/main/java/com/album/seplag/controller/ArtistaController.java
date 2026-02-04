@@ -9,6 +9,7 @@ import com.album.seplag.service.ArtistaService;
 import com.album.seplag.service.MinIOService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.media.Content;
 
 @RestController
 @RequestMapping(value = "${app.api.base}/artistas", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -84,16 +84,13 @@ public class ArtistaController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/foto")
+    @PostMapping(value = "/{id}/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload de foto", description = "Faz upload da foto do artista (substitui anterior)")
     public ResponseEntity<ArtistaDTO> uploadFoto(
             @PathVariable Long id,
-            @Parameter(
-                description = "Arquivo de imagem para upload",
-                required = true,
-                content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
-            )
-            @RequestParam("file") MultipartFile file) {
+            @Parameter(description = "Arquivo de imagem para upload", required = true,
+                    schema = @Schema(type = "string", format = "binary"))
+            @RequestPart("file") MultipartFile file) {
         minIOService.uploadFotoArtista(id, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(artistaService.findById(id));
     }

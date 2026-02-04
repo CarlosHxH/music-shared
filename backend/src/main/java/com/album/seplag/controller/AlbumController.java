@@ -10,7 +10,7 @@ import com.album.seplag.service.AlbumService;
 import com.album.seplag.service.MinIOService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import jakarta.validation.Valid;
@@ -106,16 +106,13 @@ public class AlbumController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/capa")
+    @PostMapping(value = "/{id}/capa", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload de capa", description = "Faz upload de uma ou mais capas para o álbum")
     public ResponseEntity<List<CapaAlbumDTO>> uploadCapa(
             @PathVariable Long id,
-            @Parameter(
-                description = "Arquivos de imagem para upload",
-                required = true,
-                content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
-            )
-            @RequestParam("files") MultipartFile[] files) {
+            @Parameter(description = "Arquivos de imagem para upload (multipart/form-data)", required = true,
+                    schema = @Schema(type = "string", format = "binary"))
+            @RequestPart("files") MultipartFile[] files) {
         List<CapaAlbumDTO> capas = albumService.uploadCapas(id, files);
         return ResponseEntity.status(HttpStatus.CREATED).body(capas);
     }
