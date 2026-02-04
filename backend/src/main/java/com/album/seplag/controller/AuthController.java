@@ -49,8 +49,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     @Operation(summary = "Renovar token", description = "Aceita refresh token e retorna novo access token e refresh token. Não aceita access token.")
-    public ResponseEntity<?> refreshToken(@RequestHeader(value = "Authorization", required = false) String authHeader,
-                                          HttpServletRequest request) {
+    public ResponseEntity<?> refreshToken(@RequestHeader(value = "Authorization", required = false) String authHeader, HttpServletRequest request) {
         String path = request.getRequestURI();
         if (authHeader == null || authHeader.isBlank()) {
             return ResponseEntity.badRequest().body(

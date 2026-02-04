@@ -90,8 +90,11 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Atualizar usuário", description = "Atualiza um usuário (apenas ADMIN)")
-    public ResponseEntity<UsuarioDTO> update(@PathVariable Long id, @Valid @RequestBody UsuarioUpdateDTO dto) {
+    @Operation(summary = "Atualizar usuário", description = "Atualiza um usuário (apenas ADMIN). O ID do path tem precedência; o body não deve conter id.")
+    public ResponseEntity<UsuarioDTO> update(
+            @Parameter(description = "ID do usuário (path tem precedência sobre qualquer id no body)")
+            @PathVariable Long id,
+            @Valid @RequestBody UsuarioUpdateDTO dto) {
         UsuarioDTO updated = usuarioService.update(id, dto);
         return ResponseEntity.ok(updated);
     }
