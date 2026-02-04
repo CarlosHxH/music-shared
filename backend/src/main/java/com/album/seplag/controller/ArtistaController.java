@@ -1,7 +1,8 @@
 package com.album.seplag.controller;
 
+import com.album.seplag.dto.ArtistaCreateDTO;
 import com.album.seplag.dto.ArtistaDTO;
-import com.album.seplag.model.Artista;
+import com.album.seplag.dto.ArtistaUpdateDTO;
 import com.album.seplag.service.ArtistaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -57,15 +58,15 @@ public class ArtistaController {
 
     @PostMapping
     @Operation(summary = "Criar artista", description = "Cria um novo artista")
-    public ResponseEntity<ArtistaDTO> create(@Valid @RequestBody Artista artista) {
-        ArtistaDTO created = artistaService.create(artista);
+    public ResponseEntity<ArtistaDTO> create(@Valid @RequestBody ArtistaCreateDTO dto) {
+        ArtistaDTO created = artistaService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar artista", description = "Atualiza um artista existente")
-    public ResponseEntity<ArtistaDTO> update(@PathVariable Long id, @Valid @RequestBody Artista artista) {
-        ArtistaDTO updated = artistaService.update(id, artista);
+    public ResponseEntity<ArtistaDTO> update(@PathVariable Long id, @Valid @RequestBody ArtistaUpdateDTO dto) {
+        ArtistaDTO updated = artistaService.update(id, dto);
         return ResponseEntity.ok(updated);
     }
 

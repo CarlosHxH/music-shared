@@ -39,9 +39,22 @@ public class AuthController {
 
     @PostMapping("/refresh")
     @Operation(summary = "Renovar token", description = "Renova token JWT expirado")
-    public ResponseEntity<LoginResponse> refreshToken(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7); // Remove "Bearer "
-        LoginResponse response = usuarioService.refreshToken(token);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> refreshToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader == null || authHeader.isBlank()) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", "Header Authorization é obrigatório"));
+        }
+        if (!authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", "Formato inválido. Use: Bearer <token>"));
+        }
+        String token = authHeader.substring(7).trim();
+        if (token.isEmpty()) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", "Token não pode ser vazio"));
+        }
+        try {
+            LoginResponse response = usuarioService.refreshToken(token);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(java.util.Map.of("message", e.getMessage() != null ? e.getMessage() : "Token inválido ou expirado"));
+        }
     }
 }

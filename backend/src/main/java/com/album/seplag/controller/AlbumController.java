@@ -1,8 +1,9 @@
 package com.album.seplag.controller;
 
+import com.album.seplag.dto.AlbumCreateDTO;
 import com.album.seplag.dto.AlbumDTO;
+import com.album.seplag.dto.AlbumUpdateDTO;
 import com.album.seplag.dto.PresignedUrlResponse;
-import com.album.seplag.model.Album;
 import com.album.seplag.model.CapaAlbum;
 import com.album.seplag.service.AlbumService;
 import com.album.seplag.service.MinIOService;
@@ -88,15 +89,15 @@ public class AlbumController {
 
     @PostMapping
     @Operation(summary = "Criar álbum", description = "Cria um novo álbum")
-    public ResponseEntity<AlbumDTO> create(@Valid @RequestBody Album album) {
-        AlbumDTO created = albumService.create(album);
+    public ResponseEntity<AlbumDTO> create(@Valid @RequestBody AlbumCreateDTO dto) {
+        AlbumDTO created = albumService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar álbum", description = "Atualiza um álbum existente")
-    public ResponseEntity<AlbumDTO> update(@PathVariable Long id, @Valid @RequestBody Album album) {
-        AlbumDTO updated = albumService.update(id, album);
+    public ResponseEntity<AlbumDTO> update(@PathVariable Long id, @Valid @RequestBody AlbumUpdateDTO dto) {
+        AlbumDTO updated = albumService.update(id, dto);
         return ResponseEntity.ok(updated);
     }
 
