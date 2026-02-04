@@ -131,44 +131,32 @@ public class AlbumService {
     }
 
     private CapaAlbumDTO toCapaDTO(CapaAlbum capa) {
-
-        String url = minIOService.getPresignedUrl(capa.getAlbum().getId(), capa.getId()).url();
-    
         var dataUpload = capa.getDataUpload() != null
                 ? capa.getDataUpload().atZone(ZoneId.systemDefault()).toInstant()
                 : null;
-    
         return new CapaAlbumDTO(
                 capa.getId(),
                 capa.getNomeArquivo(),
                 capa.getContentType(),
                 capa.getTamanho(),
                 dataUpload,
-                url
+                null
         );
     }
-    
 
     private AlbumDTO toDTO(Album album) {
-
-        List<CapaAlbumDTO> capas = album.getCapas().stream().map(this::toCapaDTO).collect(Collectors.toList());
-    
-        String artistaFoto = null;
-    
-        if (album.getArtista().getFotoNomeArquivo() != null) {
-            artistaFoto = minIOService.getPresignedUrlFotoArtista(album.getArtista().getId()).url();
-        }
-    
         return new AlbumDTO(
-                album.getId(),
-                album.getTitulo(),
-                album.getArtista().getId(),
-                album.getArtista().getNome(),
-                album.getDataLancamento(),
-                album.getCreatedAt(),
-                capas,
-                artistaFoto
+            album.getId(),
+            album.getTitulo(),
+            album.getArtista().getId(),
+            album.getArtista().getNome(),
+            album.getDataLancamento(),
+            album.getCreatedAt(),
+            //album.getCapas().stream().map(this::toCapaDTO).collect(Collectors.toList())
+            album.getArtista().getFotoNomeArquivo() != null ? minIOService.getPresignedUrlFotoArtista(album.getArtista().getId()).url() : null
+            //album.getArtista().getFotoNomeArquivo() != null ? minIOService.getPresignedUrlFotoArtista(album.getArtista().getId()).url() : null
         );
+        //artista.getFotoNomeArquivo() != null ? minIOService.getPresignedUrlFotoArtista(artista.getId()).url() : null
     }
 }
 

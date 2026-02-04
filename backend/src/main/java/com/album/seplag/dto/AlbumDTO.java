@@ -11,5 +11,6 @@ public record AlbumDTO(
     String artistaNome,
     LocalDate dataLancamento,
     LocalDateTime createdAt,
-    List<CapaAlbumDTO> capas
+    List<CapaAlbumDTO> capas,
+    String artistaFotoUrl
 ) {}
