@@ -6,6 +6,8 @@ import com.album.seplag.dto.ArtistaUpdateDTO;
 import com.album.seplag.exception.ResourceNotFoundException;
 import com.album.seplag.model.Artista;
 import com.album.seplag.repository.ArtistaRepository;
+import com.album.seplag.service.MinIOService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,9 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ArtistaService {
 
     private final ArtistaRepository artistaRepository;
+    private final MinIOService minIOService;
 
-    public ArtistaService(ArtistaRepository artistaRepository) {
+    public ArtistaService(ArtistaRepository artistaRepository, MinIOService minIOService) {
         this.artistaRepository = artistaRepository;
+        this.minIOService = minIOService;
     }
 
     @Transactional(readOnly = true)
@@ -81,7 +85,7 @@ public class ArtistaService {
             artista.getBiografia(),
             artista.getCreatedAt(),
             (long) artista.getAlbuns().size(),
-            artista.getFotoNomeArquivo() != null
+            artista.getFotoNomeArquivo() != null ? minIOService.getPresignedUrlFotoArtista(artista.getId()).url() : null
         );
     }
 }

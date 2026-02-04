@@ -9,5 +9,5 @@ public record ArtistaDTO(
     String biografia,
     LocalDateTime createdAt,
     Long quantidadeAlbuns,
-    boolean hasFoto
+    String fotoUrl
 ) {}

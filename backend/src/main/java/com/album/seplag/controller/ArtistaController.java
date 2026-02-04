@@ -87,8 +87,7 @@ public class ArtistaController {
     @Operation(summary = "Upload de foto", description = "Faz upload da foto do artista (substitui anterior)")
     public ResponseEntity<ArtistaDTO> uploadFoto(
             @PathVariable Long id,
-            @Parameter(description = "Arquivo de imagem para upload", required = true,
-                    schema = @Schema(type = "string", format = "binary"))
+            @Parameter(description = "Arquivo de imagem para upload", required = true, schema = @Schema(type = "string", format = "binary"))
             @RequestPart("file") MultipartFile file) {
         minIOService.uploadFotoArtista(id, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(artistaService.findById(id));
