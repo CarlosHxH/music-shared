@@ -65,7 +65,9 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui.html",
             "/swagger-ui/**",
-            apiBasePath + "/auth/**",
+            apiBasePath + "/auth/login",
+            apiBasePath + "/auth/register",
+            apiBasePath + "/auth/refresh",
             "/actuator/health/**",
             "/csrf",
             "/"

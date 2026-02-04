@@ -11,19 +11,28 @@ import com.album.seplag.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 class AuthIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Autowired
     private AuthService authService;
@@ -104,6 +113,36 @@ class AuthIntegrationTest {
         assertNotNull(refreshResponse.accessToken());
         assertNotNull(refreshResponse.refreshToken());
         assertEquals("Bearer", refreshResponse.type());
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = "USER")
+    void getMe_ShouldReturnUsuarioDTO_WhenAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("testuser"))
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.ativo").value(true));
+    }
+
+    @Test
+    void getMe_ShouldReturn401_WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = "USER")
+    void logout_ShouldReturn200_WhenAuthenticated() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/logout"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Logout realizado com sucesso"));
+    }
+
+    @Test
+    void logout_ShouldReturn401_WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/logout"))
+                .andExpect(status().isUnauthorized());
     }
 }
 
