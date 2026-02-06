@@ -1,24 +1,33 @@
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import { BehaviorSubject, Observable } from 'rxjs';
-import type { Album } from '@/models/types';
+import type { Album } from '@/types/types';
+
+export interface NotificationMessage {
+  type: string;
+  message: string;
+  timestamp?: string;
+  data?: { payload?: Album | Record<string, unknown> };
+}
 
 /**
- * Serviço WebSocket para notificações em tempo real
- * Conecta ao endpoint /ws/albuns para receber atualizações de novos álbuns
+ * Serviço WebSocket para notificações em tempo real via STOMP
+ * Conecta ao endpoint /ws/albuns e subscreve em /topic/albuns
  */
 export class WebSocketService {
-  private ws: WebSocket | null = null;
-  private novasNotificacoes$ = new BehaviorSubject<Album | null>(null);
+  private client: Client | null = null;
+  private novasNotificacoes$ = new BehaviorSubject<NotificationMessage | null>(null);
   private conectado$ = new BehaviorSubject<boolean>(false);
-  private wsUrl: string;
+  private baseUrl: string;
 
   constructor() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = import.meta.env.VITE_WS_URL || `${protocol}//${window.location.host}`;
-    this.wsUrl = `${host}/ws/albuns`;
+    const wsUrl = import.meta.env.VITE_WS_URL || '/ws';
+    this.baseUrl = typeof window !== 'undefined'
+      ? `${window.location.protocol}//${window.location.host}${wsUrl}`
+      : '';
   }
 
-  // Observables públicos
-  obterNotificacoes(): Observable<Album | null> {
+  obterNotificacoes(): Observable<NotificationMessage | null> {
     return this.novasNotificacoes$.asObservable();
   }
 
@@ -26,66 +35,49 @@ export class WebSocketService {
     return this.conectado$.asObservable();
   }
 
-  /**
-   * Conecta ao WebSocket
-   */
   conectar(): void {
-    if (this.ws) return; // Já conectado
+    if (!this.baseUrl || this.client?.active) return;
 
-    try {
-      this.ws = new WebSocket(this.wsUrl);
-
-      this.ws.onopen = () => {
-        console.log('WebSocket conectado');
+    const brokerURL = `${this.baseUrl}/albuns`;
+    this.client = new Client({
+      webSocketFactory: () => new SockJS(brokerURL) as unknown as WebSocket,
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+      onConnect: () => {
         this.conectado$.next(true);
-      };
-
-      this.ws.onmessage = (event) => {
-        try {
-          const notificacao = JSON.parse(event.data);
-          console.log('Notificação recebida:', notificacao);
-          this.novasNotificacoes$.next(notificacao);
-        } catch (error) {
-          console.error('Erro ao processar mensagem WebSocket:', error);
-        }
-      };
-
-      this.ws.onerror = (error) => {
-        console.error('Erro WebSocket:', error);
+        this.client?.subscribe('/topic/albuns', (message) => {
+          try {
+            const body = JSON.parse(message.body) as NotificationMessage;
+            this.novasNotificacoes$.next(body);
+          } catch (e) {
+            console.error('Erro ao processar mensagem STOMP:', e);
+          }
+        });
+      },
+      onStompError: (frame) => {
+        console.error('Erro STOMP:', frame);
         this.conectado$.next(false);
-      };
-
-      this.ws.onclose = () => {
-        console.log('WebSocket desconectado');
+      },
+      onWebSocketClose: () => {
         this.conectado$.next(false);
-        this.ws = null;
-        // Reconectar após 5 segundos
-        setTimeout(() => this.conectar(), 5000);
-      };
-    } catch (error) {
-      console.error('Erro ao conectar WebSocket:', error);
-      this.conectado$.next(false);
-    }
+      },
+    });
+
+    this.client.activate();
   }
 
-  /**
-   * Desconecta do WebSocket
-   */
   desconectar(): void {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+    if (this.client) {
+      this.client.deactivate();
+      this.client = null;
       this.conectado$.next(false);
     }
   }
 
-  /**
-   * Verifica se está conectado
-   */
   estaConectado(): boolean {
     return this.conectado$.value;
   }
 }
 
-// Singleton instance
 export const webSocketService = new WebSocketService();

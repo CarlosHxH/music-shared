@@ -1,6 +1,6 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import api from '../utils/api';
-import type { AuthResponse, LoginRequest, RegisterRequest, Usuario } from '@/models/types';
+import type { LoginRequest, RegisterRequest, Usuario } from '@/types/types';
 
 /**
  * Serviço de Autenticação
@@ -62,14 +62,17 @@ export class AuthService {
   async login(credenciais: LoginRequest): Promise<void> {
     this.carregando$.next(true);
     try {
-      const response = await api.post<AuthResponse>('/auth/login', credenciais);
-      const { accessToken, refreshToken, usuario } = response.data;
+      const response = await api.post<{ accessToken: string; refreshToken: string }>('/auth/login', credenciais);
+      const { accessToken, refreshToken } = response.data;
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      this.usuario$.next(usuario);
+      const usuario = await this.buscarUsuarioAtual();
+      if (usuario) {
+        localStorage.setItem('usuario', JSON.stringify(usuario));
+        this.usuario$.next(usuario);
+      }
       this.autenticado$.next(true);
     } catch (error) {
       console.error('Erro ao fazer login:', error);
@@ -80,19 +83,34 @@ export class AuthService {
   }
 
   /**
+   * Busca dados do usuário atual na API
+   */
+  private async buscarUsuarioAtual(): Promise<Usuario | null> {
+    try {
+      const response = await api.get<Usuario>('/usuarios/me');
+      return response.data;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Registra um novo usuário
    */
   async registrar(dados: RegisterRequest): Promise<void> {
     this.carregando$.next(true);
     try {
-      const response = await api.post<AuthResponse>('/auth/register', dados);
-      const { accessToken, refreshToken, usuario } = response.data;
+      const response = await api.post<{ accessToken: string; refreshToken: string }>('/auth/register', dados);
+      const { accessToken, refreshToken } = response.data;
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      this.usuario$.next(usuario);
+      const usuario = await this.buscarUsuarioAtual();
+      if (usuario) {
+        localStorage.setItem('usuario', JSON.stringify(usuario));
+        this.usuario$.next(usuario);
+      }
       this.autenticado$.next(true);
     } catch (error) {
       console.error('Erro ao registrar:', error);
@@ -140,6 +158,24 @@ export class AuthService {
    */
   obterUsuarioAtual(): Usuario | null {
     return this.usuario$.value;
+  }
+
+  /**
+   * Atualiza perfil do usuário (username e email)
+   */
+  async atualizarPerfil(username: string, email: string): Promise<Usuario> {
+    const response = await api.put<Usuario>('/usuarios/me', { username, email });
+    const usuario = response.data;
+    localStorage.setItem('usuario', JSON.stringify(usuario));
+    this.usuario$.next(usuario);
+    return usuario;
+  }
+
+  /**
+   * Altera a senha do usuário logado
+   */
+  async alterarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
+    await api.put('/usuarios/me/senha', { senhaAtual, novaSenha });
   }
 }
 

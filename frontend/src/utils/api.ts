@@ -26,6 +26,9 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+/** Endpoints de auth que não devem acionar refresh/redirect em 401 */
+const AUTH_ENDPOINTS = ['/auth/login', '/auth/register'];
+
 /**
  * Interceptador de resposta para lidar com token expirado
  */
@@ -33,6 +36,14 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const isAuthEndpoint = originalRequest?.url
+      ? AUTH_ENDPOINTS.some((ep) => originalRequest.url.includes(ep))
+      : false;
+
+    // Em login/register, 401 = credenciais inválidas - rejeitar para o componente tratar
+    if (isAuthEndpoint && error.response?.status === 401) {
+      return Promise.reject(error);
+    }
 
     // Se receber 401 e ainda não tentou refresh
     if (error.response?.status === 401 && !originalRequest._retry) {

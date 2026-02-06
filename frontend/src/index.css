@@ -8,10 +8,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -61,8 +58,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -70,38 +65,6 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }
 
 @theme inline {
@@ -169,21 +132,69 @@ button:focus-visible {
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0.15 0.02 264);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent: oklch(0.22 0.02 264);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-border: oklch(0.28 0.02 264);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Sidebar - cores slate para combinar com o tema dark */
+.dark [data-sidebar="sidebar"] {
+  background-color: rgb(15 23 42);
+  color: rgb(248 250 252);
+}
+.dark [data-sidebar="sidebar"] [data-sidebar="menu-button"]:hover,
+.dark [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"] {
+  background-color: rgb(30 41 59);
+  color: rgb(248 250 252);
+}
+.dark [data-sidebar="sidebar"] [data-sidebar="separator"] {
+  background-color: rgb(51 65 85);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+  html,
+  body,
+  #root {
+    min-height: 100vh;
   }
+  body {
+    @apply bg-slate-950 text-white;
+  }
+}
+
+/* Sonner Toast - cores alinhadas ao tema claro (emerald/slate) */
+[data-sonner-toaster][data-sonner-theme='light'] {
+  --success-bg: #ecfdf5;
+  --success-border: #a7f3d0;
+  --success-text: #047857;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --error-text: #b91c1c;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
+  --warning-text: #b45309;
+  --info-bg: #f0f9ff;
+  --info-border: #bae6fd;
+  --info-text: #0369a1;
+}
+[data-sonner-toast][data-styled='true'] [data-description] {
+  color: #475569 !important;
+}
+[data-sonner-toast][data-styled='true'] [data-close-button] {
+  background: transparent !important;
+  color: #64748b !important;
+  border-color: #e2e8f0 !important;
+}
+[data-sonner-toast][data-styled='true'] [data-close-button]:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
 }

@@ -1,16 +1,13 @@
-import { type ReactNode, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
 import { authService } from '@/services/AuthService';
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
 
 /**
  * Componente que protege rotas exigindo autenticação
  * Redireciona para login se não autenticado
  */
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute() {
   const [autenticado, setAutenticado] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -40,5 +37,5 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   // Se autenticado, renderizar componente
-  return <>{children}</>;
+  return <Outlet />;
 }

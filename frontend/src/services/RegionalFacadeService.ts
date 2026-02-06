@@ -1,6 +1,6 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import api from '@/utils/api';
-import type { Regional } from '@/models/types';
+import type { Regional } from '@/types/types';
 
 /**
  * Facade Service para Regionais
