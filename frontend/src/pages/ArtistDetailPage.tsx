@@ -131,6 +131,17 @@ export default function ArtistDetailPage() {
     }
   }
 
+  async function handleDeleteArtista() {
+    if (!artistId) return;
+    if (!confirm(`Confirma exclusão do artista "${artista?.nome}"? Todos os álbuns serão removidos.`)) return;
+    try {
+      await artistFacadeService.deletarArtista(artistId);
+      navigate('/');
+    } catch (err) {
+      showApiErrorToast(err, 'Erro ao excluir artista');
+    }
+  }
+
   return (
     <div>
       <div className="max-w-5xl mx-auto">
@@ -165,9 +176,9 @@ export default function ArtistDetailPage() {
             <div>
               {/* Botão para adicionar/editar foto do artista */}
               {usuario ? (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md transition-colors"
                     onClick={() => {
                       setNomeArtista(artista.nome);
                       setDescricaoArtista((artista.biografia ?? artista.descricao) ?? '');
@@ -179,10 +190,17 @@ export default function ArtistDetailPage() {
                     {artista.fotoUrl || artista.fotoNomeArquivo ? 'Editar' : 'Editar'}
                   </button>
                   <button
-                    className="px-4 py-2 bg-green-600 text-white rounded-md"
+                    className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-md transition-colors"
                     onClick={() => abrirFormularioNovo()}
                   >
                     Novo Álbum
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-md transition-colors"
+                    onClick={handleDeleteArtista}
+                    aria-label="Excluir artista"
+                  >
+                    Excluir artista
                   </button>
                 </div>
               ) : (

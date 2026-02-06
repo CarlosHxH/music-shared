@@ -1,18 +1,18 @@
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { BehaviorSubject, Observable } from 'rxjs';
-import type { Album } from '@/types/types';
+import type { Album, Artista } from '@/types/types';
 
 export interface NotificationMessage {
   type: string;
   message: string;
   timestamp?: string;
-  data?: { payload?: Album | Record<string, unknown> };
+  data?: { payload?: Album | Artista | Record<string, unknown> };
 }
 
 /**
  * Serviço WebSocket para notificações em tempo real via STOMP
- * Conecta ao endpoint /ws/albuns e subscreve em /topic/albuns
+ * Conecta ao endpoint /ws/albuns e subscreve em /topic/albuns e /topic/artistas
  */
 export class WebSocketService {
   private client: Client | null = null;
@@ -46,14 +46,16 @@ export class WebSocketService {
       heartbeatOutgoing: 4000,
       onConnect: () => {
         this.conectado$.next(true);
-        this.client?.subscribe('/topic/albuns', (message) => {
+        const handleMessage = (message: { body: string }) => {
           try {
             const body = JSON.parse(message.body) as NotificationMessage;
             this.novasNotificacoes$.next(body);
           } catch (e) {
             console.error('Erro ao processar mensagem STOMP:', e);
           }
-        });
+        };
+        this.client?.subscribe('/topic/albuns', handleMessage);
+        this.client?.subscribe('/topic/artistas', handleMessage);
       },
       onStompError: (frame) => {
         console.error('Erro STOMP:', frame);

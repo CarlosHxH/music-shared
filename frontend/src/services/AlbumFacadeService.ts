@@ -41,7 +41,8 @@ export class AlbumFacadeService {
       : `all_${pagina}_${tamanho}_${sort}_${direction}`;
   }
 
-  private invalidarCache(): void {
+  /** Invalida o cache (ex: ao receber notificação WebSocket de alteração) */
+  invalidarCache(): void {
     this.cacheAlbuns.clear();
     this.cacheAlbumById.clear();
   }

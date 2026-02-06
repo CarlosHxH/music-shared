@@ -42,7 +42,8 @@ export class ArtistFacadeService {
     return `${pagina}_${tamanho}_${nome ?? ''}_${ordenacao ?? 'ASC'}_${sort ?? 'nome'}_${tipo ?? ''}`;
   }
 
-  private invalidarCache(): void {
+  /** Invalida o cache (ex: ao receber notificação WebSocket de alteração) */
+  invalidarCache(): void {
     this.cacheArtistas.clear();
     this.cacheArtistaById.clear();
   }

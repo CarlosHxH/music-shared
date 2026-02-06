@@ -19,6 +19,8 @@ import { Music2, Disc3, Globe, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { webSocketService } from '@/services/WebSocketService';
+import { artistFacadeService } from '@/services/ArtistFacadeService';
+import { albumFacadeService } from '@/services/AlbumFacadeService';
 import { toast } from 'sonner';
 
 const navItems = [
@@ -41,6 +43,12 @@ export function AppLayout() {
       const sub = webSocketService.obterNotificacoes().subscribe((notif) => {
         if (notif?.message) {
           toast.info(notif.message, { duration: 5000 });
+        }
+        if (notif?.type?.startsWith('ARTISTA_')) {
+          artistFacadeService.invalidarCache();
+        }
+        if (notif?.type?.startsWith('ALBUM_')) {
+          albumFacadeService.invalidarCache();
         }
       });
       return () => {
