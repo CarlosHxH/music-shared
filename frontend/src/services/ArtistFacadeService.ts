@@ -1,6 +1,6 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import api from '@/utils/api';
-import type { Artista, PaginatedResponse } from '@/types/types';
+import type { Artista, PaginatedResponse, TipoArtista } from '@/types/types';
 
 /**
  * Facade Service para Artistas
@@ -93,11 +93,12 @@ export class ArtistFacadeService {
   /**
    * Cria um novo artista
    */
-  async criarArtista(nome: string, descricao?: string): Promise<Artista> {
+  async criarArtista(nome: string, descricao?: string, tipoArtista?: TipoArtista): Promise<Artista> {
     try {
       const response = await api.post<Artista>('/artistas', {
         nome,
-        descricao,
+        biografia: descricao,
+        tipoArtista: tipoArtista ?? 'CANTOR',
       });
       return response.data;
     } catch (error) {
@@ -112,12 +113,14 @@ export class ArtistFacadeService {
   async atualizarArtista(
     id: number,
     nome: string,
-    descricao?: string
+    descricao?: string,
+    tipoArtista?: TipoArtista
   ): Promise<Artista> {
     try {
       const response = await api.put<Artista>(`/artistas/${id}`, {
         nome,
-        descricao,
+        biografia: descricao,
+        tipoArtista,
       });
       const atualizado = response.data;
       this.selecionado$.next(atualizado);

@@ -1,5 +1,6 @@
 package com.album.seplag.model;
 
+import com.album.seplag.enums.TipoArtista;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +26,10 @@ public class Artista {
 
     @Column(length = 50)
     private String genero;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_artista", length = 20)
+    private TipoArtista tipoArtista = TipoArtista.CANTOR;
 
     @Column(columnDefinition = "TEXT")
     private String biografia;

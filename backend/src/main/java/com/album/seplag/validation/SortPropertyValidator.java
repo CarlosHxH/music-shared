@@ -20,7 +20,7 @@ public final class SortPropertyValidator {
 
     public static String getValidPropertiesForEntity(String entityType) {
         return switch (entityType) {
-            case "Artista" -> "id, nome, genero, createdAt, updatedAt";
+            case "Artista" -> "id, nome, genero, tipoArtista, createdAt, updatedAt";
             case "Album" -> "id, titulo, dataLancamento, createdAt, updatedAt";
             default -> "consulte a documentação da API";
         };

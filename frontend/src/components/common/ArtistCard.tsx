@@ -25,7 +25,12 @@ export default function ArtistCard({ artist, onClick }: Props) {
         />
       </div>
       <CardContent className="p-4">
-        <h3 className="text-white font-semibold truncate">{artist.nome}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-white font-semibold truncate">{artist.nome}</h3>
+          <span className="shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-slate-600 text-slate-300">
+            {artist.tipoArtista === 'BANDA' ? 'Banda' : 'Cantor'}
+          </span>
+        </div>
         <p className="text-sm text-slate-400 mt-1">
           {artist.quantidadeAlbuns ?? artist.albumCount ?? 0} álbuns
         </p>

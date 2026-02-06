@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { artistFacadeService } from '@/services/ArtistFacadeService';
 import { albumFacadeService } from '@/services/AlbumFacadeService';
 import { authService } from '@/services/AuthService';
-import type { Artista, Album, Usuario } from '@/types/types';
+import type { Artista, Album, Usuario, TipoArtista } from '@/types/types';
 import Modal from '@/components/common/Modal';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/errorUtils';
@@ -28,6 +28,7 @@ export default function ArtistDetailPage() {
   const [uploadingFoto, setUploadingFoto] = useState(false);
   const [nomeArtista, setNomeArtista] = useState<string>('');
   const [descricaoArtista, setDescricaoArtista] = useState<string>('');
+  const [tipoArtista, setTipoArtista] = useState<TipoArtista>('CANTOR');
   const [usuario, setUsuario] = useState<Usuario | null>(null);
 
   useEffect(() => {
@@ -140,7 +141,12 @@ export default function ArtistDetailPage() {
                 />
               </div>
               <div>
-                <h1 className="text-3xl text-white font-bold">{artista.nome}</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-3xl text-white font-bold">{artista.nome}</h1>
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-600 text-slate-300">
+                    {artista.tipoArtista === 'BANDA' ? 'Banda' : 'Cantor'}
+                  </span>
+                </div>
                 {(artista.biografia ?? artista.descricao) && (
                 <p className="text-slate-400 mt-2">{artista.biografia ?? artista.descricao}</p>
               )}
@@ -157,6 +163,7 @@ export default function ArtistDetailPage() {
                     onClick={() => {
                       setNomeArtista(artista.nome);
                       setDescricaoArtista((artista.biografia ?? artista.descricao) ?? '');
+                      setTipoArtista(artista.tipoArtista ?? 'CANTOR');
                       setSelectedFotoFile(null);
                       setShowFotoModal(true);
                     }}
@@ -233,8 +240,8 @@ export default function ArtistDetailPage() {
                 if (!artistId) return;
                 try {
                   setUploadingFoto(true);
-                  // Atualiza nome/descrição
-                  await artistFacadeService.atualizarArtista(artistId, nomeArtista, descricaoArtista);
+                  // Atualiza nome/descrição/tipo
+                  await artistFacadeService.atualizarArtista(artistId, nomeArtista, descricaoArtista, tipoArtista);
                   // Se houver arquivo selecionado, envia a foto
                   if (selectedFotoFile) {
                     await artistFacadeService.uploadFotoArtista(artistId, selectedFotoFile);
@@ -257,6 +264,18 @@ export default function ArtistDetailPage() {
                   required
                   className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded mt-1 text-white"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm text-slate-300">Tipo</label>
+                <select
+                  value={tipoArtista}
+                  onChange={(e) => setTipoArtista(e.target.value as TipoArtista)}
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded mt-1 text-white"
+                >
+                  <option value="CANTOR">Cantor</option>
+                  <option value="BANDA">Banda</option>
+                </select>
               </div>
 
               <div>

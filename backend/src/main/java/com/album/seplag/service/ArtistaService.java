@@ -3,6 +3,7 @@ package com.album.seplag.service;
 import com.album.seplag.dto.ArtistaCreateDTO;
 import com.album.seplag.dto.ArtistaDTO;
 import com.album.seplag.dto.ArtistaUpdateDTO;
+import com.album.seplag.enums.TipoArtista;
 import com.album.seplag.exception.ResourceNotFoundException;
 import com.album.seplag.model.Artista;
 import com.album.seplag.repository.ArtistaRepository;
@@ -50,6 +51,7 @@ public class ArtistaService {
         Artista artista = new Artista();
         artista.setNome(dto.nome());
         artista.setGenero(dto.genero());
+        artista.setTipoArtista(dto.tipoArtista() != null ? dto.tipoArtista() : TipoArtista.CANTOR);
         artista.setBiografia(dto.biografia());
         Artista saved = artistaRepository.save(artista);
         return toDTO(saved);
@@ -62,6 +64,7 @@ public class ArtistaService {
         
         artista.setNome(dto.nome());
         artista.setGenero(dto.genero());
+        artista.setTipoArtista(dto.tipoArtista() != null ? dto.tipoArtista() : artista.getTipoArtista());
         artista.setBiografia(dto.biografia());
         Artista saved = artistaRepository.save(artista);
         return toDTO(saved);
@@ -81,6 +84,7 @@ public class ArtistaService {
             artista.getId(),
             artista.getNome(),
             artista.getGenero(),
+            artista.getTipoArtista(),
             artista.getBiografia(),
             artista.getCreatedAt(),
             (long) artista.getAlbuns().size(),

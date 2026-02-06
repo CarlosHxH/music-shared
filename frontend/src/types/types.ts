@@ -2,6 +2,8 @@
  * Tipos e Interfaces da Aplicação
  */
 
+export type TipoArtista = 'CANTOR' | 'BANDA';
+
 export interface Usuario {
   id: number;
   username: string;
@@ -16,6 +18,7 @@ export interface Usuario {
 export interface Artista {
   id: number;
   nome: string;
+  tipoArtista?: TipoArtista;
   descricao?: string;
   biografia?: string;
   fotoNomeArquivo?: string;

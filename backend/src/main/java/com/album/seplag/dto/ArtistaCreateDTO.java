@@ -1,5 +1,6 @@
 package com.album.seplag.dto;
 
+import com.album.seplag.enums.TipoArtista;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -13,6 +14,8 @@ public record ArtistaCreateDTO(
 
     @Size(max = 50, message = "Gênero deve ter no máximo 50 caracteres")
     String genero,
+
+    TipoArtista tipoArtista,
 
     String biografia
 ) {}
