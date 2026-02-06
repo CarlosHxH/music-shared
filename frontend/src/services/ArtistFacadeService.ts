@@ -45,7 +45,8 @@ export class ArtistFacadeService {
     tamanho: number = 10,
     nome?: string,
     ordenacao?: 'ASC' | 'DESC',
-    sort: string = 'nome'
+    sort: string = 'nome',
+    tipo?: TipoArtista
   ): Promise<void> {
     this.carregando$.next(true);
     try {
@@ -54,6 +55,7 @@ export class ArtistFacadeService {
           page: pagina,
           size: tamanho,
           nome: nome || undefined,
+          tipo: tipo || undefined,
           sort,
           direction: ordenacao || 'ASC',
         },

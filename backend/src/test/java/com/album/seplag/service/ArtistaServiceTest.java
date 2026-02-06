@@ -70,7 +70,7 @@ class ArtistaServiceTest {
         Page<Artista> artistaPage = new PageImpl<>(List.of(artista), pageable, 1);
         when(artistaRepository.findAll(pageable)).thenReturn(artistaPage);
 
-        Page<ArtistaDTO> result = artistaService.findAll(null, pageable);
+        Page<ArtistaDTO> result = artistaService.findAll(null, null, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());

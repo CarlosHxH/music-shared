@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { artistFacadeService } from '@/services/ArtistFacadeService';
-import type { Artista } from '@/types/types';
+import type { Artista, TipoArtista } from '@/types/types';
 import ArtistCard from '@/components/common/ArtistCard';
 import ArtistCardSkeleton from '@/components/common/ArtistCardSkeleton';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +26,7 @@ export function HomePage() {
   const [carregando, setCarregando] = useState(false);
   const [nome, setNome] = useState('');
   const [nomeDebounced, setNomeDebounced] = useState('');
+  const [tipoFiltro, setTipoFiltro] = useState<TipoArtista | ''>('');
   const [sort, setSort] = useState<'nome' | 'id' | 'createdAt'>('nome');
   const [ordenacao, setOrdenacao] = useState<'ASC' | 'DESC'>('ASC');
   const navigate = useNavigate();
@@ -44,7 +45,8 @@ export function HomePage() {
           tamanho,
           nomeDebounced || undefined,
           ordenacao,
-          sort
+          sort,
+          tipoFiltro || undefined
         );
       } catch (error) {
         toast.error(getErrorMessage(error, 'Falha ao carregar artistas'));
@@ -52,7 +54,7 @@ export function HomePage() {
         setCarregando(false);
       }
     },
-    [tamanho, nomeDebounced, ordenacao, sort]
+    [tamanho, nomeDebounced, ordenacao, sort, tipoFiltro]
   );
 
   useEffect(() => {
@@ -86,6 +88,21 @@ export function HomePage() {
               onChange={(e) => setNome(e.target.value)}
               className="mt-1 bg-slate-800 border-slate-600 text-white"
             />
+          </div>
+          <div>
+            <Label htmlFor="filtro-tipo" className="text-slate-400 text-sm">
+              Tipo
+            </Label>
+            <select
+              id="filtro-tipo"
+              value={tipoFiltro}
+              onChange={(e) => setTipoFiltro(e.target.value as TipoArtista | '')}
+              className="mt-1 h-9 rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+            >
+              <option value="">Todos</option>
+              <option value="CANTOR">Cantor</option>
+              <option value="BANDA">Banda</option>
+            </select>
           </div>
           <div>
             <Label htmlFor="sort-artistas" className="text-slate-400 text-sm">

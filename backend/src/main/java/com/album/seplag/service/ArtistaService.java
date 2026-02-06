@@ -27,10 +27,15 @@ public class ArtistaService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ArtistaDTO> findAll(String nome, Pageable pageable) {
+    public Page<ArtistaDTO> findAll(String nome, TipoArtista tipoArtista, Pageable pageable) {
         Page<Artista> artistas;
-        
-        if (nome != null && !nome.trim().isEmpty()) {
+        boolean temNome = nome != null && !nome.trim().isEmpty();
+
+        if (temNome && tipoArtista != null) {
+            artistas = artistaRepository.findByNomeContainingIgnoreCaseAndTipoArtista(nome, tipoArtista, pageable);
+        } else if (tipoArtista != null) {
+            artistas = artistaRepository.findByTipoArtista(tipoArtista, pageable);
+        } else if (temNome) {
             artistas = artistaRepository.findByNomeContainingIgnoreCase(nome, pageable);
         } else {
             artistas = artistaRepository.findAll(pageable);

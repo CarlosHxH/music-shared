@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.album.seplag.dto.ArtistaCreateDTO;
 import com.album.seplag.dto.ArtistaDTO;
 import com.album.seplag.dto.ArtistaUpdateDTO;
+import com.album.seplag.enums.TipoArtista;
 import com.album.seplag.dto.PageResponseDTO;
 import com.album.seplag.dto.PresignedUrlResponse;
 import com.album.seplag.enums.SortDirection;
@@ -48,9 +49,11 @@ public class ArtistaController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar artistas", description = "Lista artistas com paginação e filtro por nome")
+    @Operation(summary = "Listar artistas", description = "Lista artistas com paginação e filtros por nome e tipo")
     public ResponseEntity<PageResponseDTO<ArtistaDTO>> findAll(
             @RequestParam(required = false) String nome,
+            @Parameter(description = "Filtro por tipo: CANTOR ou BANDA")
+            @RequestParam(required = false) TipoArtista tipo,
             @Parameter(description = "Número da página (começa em 0)")
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Tamanho da página")
@@ -63,7 +66,7 @@ public class ArtistaController {
         Sort.Direction sortDirection = direction == SortDirection.DESC ? Sort.Direction.DESC : Sort.Direction.ASC;
         
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
-        return ResponseEntity.ok(PageResponseDTO.of(artistaService.findAll(nome, pageable)));
+        return ResponseEntity.ok(PageResponseDTO.of(artistaService.findAll(nome, tipo, pageable)));
     }
 
     @GetMapping("/{id}")
