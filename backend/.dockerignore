@@ -1,6 +1,63 @@
-target
-.mvn
-*.log
-.env
-.env.local
+# Build artifacts
+target/
+.mvn/
+*.jar
+*.war
+*.ear
 
+# Logs
+*.log
+logs/
+
+# Environment files (segurança - não copiar secrets)
+.env
+.env.*
+*.env
+*.env.local
+*.env.production
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Test files
+src/test/
+*.test
+*.spec
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets e certificados (CRÍTICO para segurança)
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+secrets/
+credentials/

@@ -29,10 +29,10 @@ public class RegionalController {
     }
 
     @PostMapping("/sincronizar")
-    @Operation(summary = "Sincronizar regionais", description = "Força sincronização com API externa")
-    public ResponseEntity<String> sincronizar() {
-        regionalService.sincronizarRegionais();
-        return ResponseEntity.ok("Sincronização iniciada");
+    @Operation(summary = "Sincronizar regionais", description = "Força sincronização com API externa e retorna lista atualizada")
+    public ResponseEntity<List<RegionalDTO>> sincronizar() {
+        List<RegionalDTO> regionais = regionalService.sincronizarERetornar();
+        return ResponseEntity.ok(regionais);
     }
 }
 
