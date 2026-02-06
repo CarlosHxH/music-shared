@@ -28,7 +28,7 @@ export function ImagePreviewGrid({ items }: { items: PreviewItem[] }) {
             <button
               type="button"
               onClick={item.onRemove}
-              className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity min-w-[44px] min-h-[44px] touch-manipulation"
               aria-label="Remover"
             >
               <X className="size-5 text-red-400" />

@@ -110,7 +110,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 w-full">
+    <div className="max-w-2xl mx-auto w-full min-w-0">
       {/* Header com avatar e nome */}
       <header className="mb-8">
         <div className="flex flex-col items-center gap-4 sm:gap-6">

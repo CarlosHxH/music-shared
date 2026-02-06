@@ -109,10 +109,10 @@ export function HomePage() {
   }
 
   return (
-    <div>
+    <div className="min-w-0">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl text-white font-bold">Artistas</h1>
+        <header className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h1 className="text-xl sm:text-2xl text-white font-bold truncate">Artistas</h1>
           {usuario && (
             <Button
               size="sm"
@@ -208,8 +208,8 @@ export function HomePage() {
           </form>
         </Modal>
 
-        <div className="mb-6 flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[200px]">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-end gap-3 sm:gap-4">
+          <div className="flex-1 min-w-0 sm:min-w-[180px]">
             <Label htmlFor="filtro-nome" className="text-slate-400 text-sm">
               Buscar por nome
             </Label>
@@ -222,7 +222,7 @@ export function HomePage() {
               className="mt-1 bg-slate-800 border-slate-600 text-white"
             />
           </div>
-          <div>
+          <div className="min-w-0 sm:min-w-[120px]">
             <Label htmlFor="filtro-tipo" className="text-slate-400 text-sm">
               Tipo
             </Label>
@@ -230,14 +230,14 @@ export function HomePage() {
               id="filtro-tipo"
               value={tipoFiltro}
               onChange={(e) => setTipoFiltro(e.target.value as TipoArtista | '')}
-              className="mt-1 h-9 rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+              className="mt-1 h-9 w-full sm:w-auto rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
             >
               <option value="">Todos</option>
               <option value="CANTOR">Cantor</option>
               <option value="BANDA">Banda</option>
             </select>
           </div>
-          <div>
+          <div className="min-w-0 sm:min-w-[140px]">
             <Label htmlFor="sort-artistas" className="text-slate-400 text-sm">
               Ordenar por
             </Label>
@@ -245,7 +245,7 @@ export function HomePage() {
               id="sort-artistas"
               value={sort}
               onChange={(e) => setSort(e.target.value as typeof sort)}
-              className="mt-1 h-9 rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+              className="mt-1 h-9 w-full sm:w-auto rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -254,7 +254,7 @@ export function HomePage() {
               ))}
             </select>
           </div>
-          <div>
+          <div className="min-w-0 sm:min-w-[100px]">
             <Label htmlFor="dir-artistas" className="text-slate-400 text-sm">
               Direção
             </Label>
@@ -262,7 +262,7 @@ export function HomePage() {
               id="dir-artistas"
               value={ordenacao}
               onChange={(e) => setOrdenacao(e.target.value as typeof ordenacao)}
-              className="mt-1 h-9 rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+              className="mt-1 h-9 w-full sm:w-auto rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
             >
               <option value="ASC">A-Z</option>
               <option value="DESC">Z-A</option>
@@ -270,7 +270,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
           {carregando ? (
             Array.from({ length: tamanho }).map((_, i) => (
               <ArtistCardSkeleton key={i} />
@@ -284,10 +284,11 @@ export function HomePage() {
           )}
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-3">
+        <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           <Button
             variant="secondary"
-            className="bg-slate-700 hover:bg-slate-600 text-white"
+            size="sm"
+            className="bg-slate-700 hover:bg-slate-600 text-white min-w-[100px] sm:min-w-0"
             onClick={() => {
               const p = Math.max(0, pagina - 1);
               setPagina(p);
@@ -300,7 +301,8 @@ export function HomePage() {
 
           <Button
             variant="secondary"
-            className="bg-slate-700 hover:bg-slate-600 text-white"
+            size="sm"
+            className="bg-slate-700 hover:bg-slate-600 text-white min-w-[100px] sm:min-w-0"
             onClick={() => {
               const p = pagina + 1;
               setPagina(p);

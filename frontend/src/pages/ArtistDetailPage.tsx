@@ -151,39 +151,48 @@ export default function ArtistDetailPage() {
   }
 
   return (
-    <div>
+    <div className="min-w-0">
       <div className="max-w-5xl mx-auto">
-        <button className="text-slate-400 mb-4" onClick={() => navigate(-1)}>
+        <button
+          className="text-slate-400 mb-4 hover:text-slate-200 transition-colors text-sm sm:text-base touch-manipulation"
+          onClick={() => navigate(-1)}
+        >
           ← Voltar
         </button>
 
         {artista ? (
-          <header className="mb-6 flex items-center gap-6 justify-between">
-            <div className="flex items-center gap-6">
-              <div className="w-36 h-36 bg-gray-800 rounded overflow-hidden flex items-center justify-center">
+          <header className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 sm:justify-between">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 min-w-0">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-gray-800 rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
                 <img
                   src={artista.fotoUrl ?? "/240x240.png"}
                   alt={artista.nome}
                   className="object-cover w-full h-full"
                 />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-3xl text-white font-bold">{artista.nome}</h1>
-                  <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-600 text-slate-300">
+              <div className="text-center sm:text-left min-w-0 flex-1">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl text-white font-bold truncate max-w-full">
+                    {artista.nome}
+                  </h1>
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-600 text-slate-300 shrink-0">
                     {artista.tipoArtista === 'BANDA' ? 'Banda' : 'Cantor'}
                   </span>
                 </div>
                 {(artista.biografia ?? artista.descricao) && (
-                <p className="text-slate-400 mt-2">{artista.biografia ?? artista.descricao}</p>
-              )}
-                <p className="text-slate-500 mt-1 text-sm">{artista.quantidadeAlbuns ?? artista.albumCount ?? albuns.length} álbuns</p>
+                  <p className="text-slate-400 mt-2 text-sm sm:text-base line-clamp-2 sm:line-clamp-3">
+                    {artista.biografia ?? artista.descricao}
+                  </p>
+                )}
+                <p className="text-slate-500 mt-1 text-sm">
+                  {artista.quantidadeAlbuns ?? artista.albumCount ?? albuns.length} álbuns
+                </p>
               </div>
             </div>
 
-            <div>
+            <div className="flex justify-center sm:justify-end shrink-0">
               {usuario ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-center sm:justify-end gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -419,16 +428,16 @@ export default function ArtistDetailPage() {
           {carregando && <div className="text-slate-400">Carregando álbuns...</div>}
 
           <TooltipProvider delayDuration={300}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
               {albuns.length === 0 && !carregando ? (
                 <div className="text-slate-400">Nenhum álbum encontrado para este artista.</div>
               ) : (
                 albuns.map((album) => (
-                  <div key={album.id} className="bg-slate-900/60 border border-slate-700 rounded-lg overflow-hidden group">
-                    <div className="h-44 w-full bg-gray-800 flex items-center justify-center relative">
+                  <div key={album.id} className="bg-slate-900/60 border border-slate-700 rounded-lg overflow-hidden group min-w-0">
+                    <div className="aspect-square w-full bg-gray-800 flex items-center justify-center relative">
                       <AlbumCover album={album} />
                       {usuario && (
-                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
@@ -477,5 +486,5 @@ export default function ArtistDetailPage() {
 
 function AlbumCover({ album }: { album: Album }) {
   const url = album.capas?.[0]?.presignedUrl ?? album.capas?.[0]?.url ?? null;
-  return <img src={url ?? "/240x240.png"} alt={album.titulo} className="object-cover w-full h-44" />;
+  return <img src={url ?? "/240x240.png"} alt={album.titulo} className="object-cover w-full h-full" />;
 }

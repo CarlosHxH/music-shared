@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function AlbumCardSkeleton() {
   return (
     <Card className="bg-slate-800/60 border-slate-700 overflow-hidden p-0 gap-0">
-      <Skeleton className="h-44 w-full rounded-none bg-slate-700" />
+      <Skeleton className="h-36 sm:h-44 w-full rounded-none bg-slate-700" />
       <CardContent className="p-4">
         <Skeleton className="h-5 w-3/4 bg-slate-700" />
         <Skeleton className="h-4 w-1/2 mt-2 bg-slate-700" />

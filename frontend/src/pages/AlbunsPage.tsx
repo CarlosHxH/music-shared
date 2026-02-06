@@ -175,9 +175,9 @@ export default function AlbunsPage() {
   }
 
   return (
-    <div>
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl text-white font-bold">Álbuns</h1>
+    <div className="min-w-0">
+      <header className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl text-white font-bold truncate">Álbuns</h1>
         {usuario && (
           <Button
             size="sm"
@@ -282,8 +282,8 @@ export default function AlbunsPage() {
         </form>
       </Modal>
 
-      <div className="mb-6 flex flex-wrap items-end gap-4">
-        <div>
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-end gap-3 sm:gap-4">
+        <div className="flex-1 min-w-0 sm:min-w-[180px]">
           <Label htmlFor="filtro-artista" className="text-slate-400 text-sm">
             Filtrar por artista
           </Label>
@@ -293,7 +293,7 @@ export default function AlbunsPage() {
             onChange={(e) =>
               setArtistaId(e.target.value === '' ? '' : Number(e.target.value))
             }
-            className="mt-1 h-9 min-w-[180px] rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+            className="mt-1 h-9 w-full sm:min-w-[180px] rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
           >
             <option value="">Todos os artistas</option>
             {artistas.map((a) => (
@@ -303,7 +303,7 @@ export default function AlbunsPage() {
             ))}
           </select>
         </div>
-        <div>
+        <div className="min-w-0 sm:min-w-[140px]">
           <Label htmlFor="sort-albuns" className="text-slate-400 text-sm">
             Ordenar por
           </Label>
@@ -311,7 +311,7 @@ export default function AlbunsPage() {
             id="sort-albuns"
             value={sort}
             onChange={(e) => setSort(e.target.value as typeof sort)}
-            className="mt-1 h-9 rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+            className="mt-1 h-9 w-full sm:w-auto rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -320,7 +320,7 @@ export default function AlbunsPage() {
             ))}
           </select>
         </div>
-        <div>
+        <div className="min-w-0 sm:min-w-[100px]">
           <Label htmlFor="dir-albuns" className="text-slate-400 text-sm">
             Ordenação
           </Label>
@@ -328,7 +328,7 @@ export default function AlbunsPage() {
             id="dir-albuns"
             value={direction}
             onChange={(e) => setDirection(e.target.value as typeof direction)}
-            className="mt-1 h-9 rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+            className="mt-1 h-9 w-full sm:w-auto rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
           >
             <option value="ASC">A-Z</option>
             <option value="DESC">Z-A</option>
@@ -336,7 +336,7 @@ export default function AlbunsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
         {carregando ? (
           Array.from({ length: tamanho }).map((_, i) => (
             <AlbumCardSkeleton key={i} />
@@ -399,10 +399,11 @@ export default function AlbunsPage() {
         )}
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-3">
+      <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
         <Button
           variant="secondary"
-          className="bg-slate-700 hover:bg-slate-600 text-white"
+          size="sm"
+          className="bg-slate-700 hover:bg-slate-600 text-white min-w-[100px] sm:min-w-0"
           onClick={() => carregar(Math.max(0, pagina - 1))}
           disabled={pagina === 0}
         >
@@ -411,7 +412,8 @@ export default function AlbunsPage() {
 
         <Button
           variant="secondary"
-          className="bg-slate-700 hover:bg-slate-600 text-white"
+          size="sm"
+          className="bg-slate-700 hover:bg-slate-600 text-white min-w-[100px] sm:min-w-0"
           onClick={() => carregar(pagina + 1)}
           disabled={pagina >= totalPaginas - 1 || totalPaginas === 0}
         >

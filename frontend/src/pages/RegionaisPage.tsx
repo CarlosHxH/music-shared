@@ -100,9 +100,9 @@ export default function RegionaisPage() {
   }
 
   return (
-    <div>
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl text-white font-bold">Regionais</h1>
+    <div className="min-w-0">
+      <header className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl text-white font-bold truncate">Regionais</h1>
         {isAdmin && (
           <Button
             className="bg-emerald-600 hover:bg-emerald-500 text-white"
@@ -114,8 +114,8 @@ export default function RegionaisPage() {
         )}
       </header>
 
-      <div className="mb-6 flex flex-wrap items-end gap-4">
-        <div className="flex-1 min-w-[200px]">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-end gap-3 sm:gap-4">
+        <div className="flex-1 min-w-0 sm:min-w-[180px]">
           <Label htmlFor="filtro-nome-regionais" className="text-slate-400 text-sm">
             Buscar por nome
           </Label>
@@ -128,7 +128,7 @@ export default function RegionaisPage() {
             className="mt-1 bg-slate-800 border-slate-600 text-white"
           />
         </div>
-        <div>
+        <div className="min-w-0 sm:min-w-[120px]">
           <Label htmlFor="filtro-ativo" className="text-slate-400 text-sm">
             Status
           </Label>
@@ -136,14 +136,14 @@ export default function RegionaisPage() {
             id="filtro-ativo"
             value={filtroAtivo}
             onChange={(e) => setFiltroAtivo(e.target.value as typeof filtroAtivo)}
-            className="mt-1 h-9 rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+            className="mt-1 h-9 w-full sm:w-auto rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
           >
             <option value="">Todos</option>
             <option value="true">Ativos</option>
             <option value="false">Inativos</option>
           </select>
         </div>
-        <div>
+        <div className="min-w-0 sm:min-w-[160px]">
           <Label htmlFor="sort-regionais" className="text-slate-400 text-sm">
             Ordenar por
           </Label>
@@ -151,7 +151,7 @@ export default function RegionaisPage() {
             id="sort-regionais"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className="mt-1 h-9 rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+            className="mt-1 h-9 w-full sm:w-auto rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -160,7 +160,7 @@ export default function RegionaisPage() {
             ))}
           </select>
         </div>
-        <div>
+        <div className="min-w-0 sm:min-w-[100px]">
           <Label htmlFor="dir-regionais" className="text-slate-400 text-sm">
             Ordenação
           </Label>
@@ -168,7 +168,7 @@ export default function RegionaisPage() {
             id="dir-regionais"
             value={sortDir}
             onChange={(e) => setSortDir(e.target.value as typeof sortDir)}
-            className="mt-1 h-9 rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
+            className="mt-1 h-9 w-full sm:w-auto rounded-md border border-slate-600 bg-slate-700 px-3 text-white"
           >
             <option value="ASC">A-Z</option>
             <option value="DESC">Z-A</option>
@@ -212,7 +212,7 @@ export default function RegionaisPage() {
                         {r.ativo ? 'Sim' : 'Não'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-400 text-sm">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-slate-400 text-xs sm:text-sm whitespace-nowrap">
                       {formatarData(r.dataSincronizacao)}
                     </td>
                   </tr>
