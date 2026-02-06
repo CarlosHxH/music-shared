@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { Album, Artista } from '@/types/types';
 import Modal from '@/components/common/Modal';
 import { showApiErrorToast } from '@/lib/errorUtils';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AlbumCardSkeleton from '@/components/common/AlbumCardSkeleton';
@@ -32,9 +33,11 @@ export default function AlbunsPage() {
   const [direction, setDirection] = useState<'ASC' | 'DESC'>('ASC');
   const [artistaId, setArtistaId] = useState<number | ''>('');
   const [showNovoAlbum, setShowNovoAlbum] = useState(false);
+  const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
   const [tituloNovo, setTituloNovo] = useState('');
   const [artistaIdNovo, setArtistaIdNovo] = useState<number | ''>('');
   const [dataLancamentoNovo, setDataLancamentoNovo] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [salvando, setSalvando] = useState(false);
   const tamanho = 12;
 
@@ -83,26 +86,65 @@ export default function AlbunsPage() {
     };
   }, [carregar]);
 
-  async function handleCriarAlbum(e: React.FormEvent) {
+  function abrirEdicao(album: Album) {
+    setEditingAlbum(album);
+    setTituloNovo(album.titulo);
+    setArtistaIdNovo(album.artistaId);
+    setDataLancamentoNovo(album.dataLancamento ?? '');
+    setSelectedFiles([]);
+    setShowNovoAlbum(true);
+  }
+
+  function fecharModal() {
+    setShowNovoAlbum(false);
+    setEditingAlbum(null);
+    setTituloNovo('');
+    setArtistaIdNovo('');
+    setDataLancamentoNovo('');
+    setSelectedFiles([]);
+  }
+
+  async function handleSubmitAlbum(e: React.FormEvent) {
     e.preventDefault();
     if (!tituloNovo.trim() || !artistaIdNovo || typeof artistaIdNovo !== 'number') return;
     setSalvando(true);
     try {
-      await albumFacadeService.criarAlbum(
-        tituloNovo.trim(),
-        artistaIdNovo,
-        dataLancamentoNovo || undefined
-      );
-      setShowNovoAlbum(false);
-      setTituloNovo('');
-      setArtistaIdNovo('');
-      setDataLancamentoNovo('');
-      setPagina(0);
-      await carregar(0);
+      let albumId: number;
+      if (editingAlbum) {
+        await albumFacadeService.atualizarAlbum(
+          editingAlbum.id,
+          tituloNovo.trim(),
+          artistaIdNovo,
+          dataLancamentoNovo || undefined
+        );
+        albumId = editingAlbum.id;
+      } else {
+        const criado = await albumFacadeService.criarAlbum(
+          tituloNovo.trim(),
+          artistaIdNovo,
+          dataLancamentoNovo || undefined
+        );
+        albumId = criado.id;
+      }
+      if (selectedFiles.length > 0) {
+        await albumFacadeService.uploadCapas(albumId, selectedFiles);
+      }
+      fecharModal();
+      await carregar(pagina);
     } catch (err) {
-      showApiErrorToast(err, 'Erro ao criar álbum');
+      showApiErrorToast(err, editingAlbum ? 'Erro ao atualizar álbum' : 'Erro ao criar álbum');
     } finally {
       setSalvando(false);
+    }
+  }
+
+  async function handleDeletarAlbum(albumId: number) {
+    if (!confirm('Confirma exclusão do álbum?')) return;
+    try {
+      await albumFacadeService.deletarAlbum(albumId);
+      await carregar(pagina);
+    } catch (err) {
+      showApiErrorToast(err, 'Erro ao deletar álbum');
     }
   }
 
@@ -113,15 +155,22 @@ export default function AlbunsPage() {
         {usuario && (
           <Button
             className="bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => setShowNovoAlbum(true)}
+            onClick={() => {
+              setEditingAlbum(null);
+              setTituloNovo('');
+              setArtistaIdNovo('');
+              setDataLancamentoNovo('');
+              setSelectedFiles([]);
+              setShowNovoAlbum(true);
+            }}
           >
             Novo Álbum
           </Button>
         )}
       </header>
 
-      <Modal open={showNovoAlbum} onClose={() => setShowNovoAlbum(false)} title="Novo Álbum">
-        <form onSubmit={handleCriarAlbum} className="space-y-4">
+      <Modal open={showNovoAlbum} onClose={fecharModal} title={editingAlbum ? 'Editar Álbum' : 'Novo Álbum'}>
+        <form onSubmit={handleSubmitAlbum} className="space-y-4">
           <div>
             <Label htmlFor="artista-album" className="text-slate-300">Artista</Label>
             <select
@@ -160,11 +209,27 @@ export default function AlbunsPage() {
               className="mt-1 bg-slate-700 border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
             />
           </div>
+          <div>
+            <Label htmlFor="capas-album" className="text-slate-300">
+              {editingAlbum ? 'Adicionar ou alterar capas (png/jpg)' : 'Capas (png/jpg, opcional)'}
+            </Label>
+            <input
+              id="capas-album"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => setSelectedFiles(Array.from(e.target.files || []))}
+              className="mt-1 w-full text-sm text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-600 file:text-white file:cursor-pointer hover:file:bg-slate-500"
+            />
+            {selectedFiles.length > 0 && (
+              <p className="mt-1 text-xs text-slate-400">{selectedFiles.length} arquivo(s) selecionado(s)</p>
+            )}
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button
               type="button"
               variant="secondary"
-              onClick={() => setShowNovoAlbum(false)}
+              onClick={fecharModal}
               className="bg-slate-700 hover:bg-slate-600 text-slate-200"
             >
               Cancelar
@@ -174,7 +239,7 @@ export default function AlbunsPage() {
               className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30"
               disabled={salvando}
             >
-              {salvando ? 'Salvando...' : 'Criar'}
+              {salvando ? 'Salvando...' : editingAlbum ? 'Salvar' : 'Criar'}
             </Button>
           </div>
         </form>
@@ -251,8 +316,34 @@ export default function AlbunsPage() {
                 <AlbumCover album={album} />
               </div>
               <CardContent className="p-4">
-                <h3 className="text-white font-semibold truncate">{album.titulo}</h3>
-                <p className="text-sm text-slate-400 mt-1">{album.artistaNome}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-white font-semibold truncate">{album.titulo}</h3>
+                    <p className="text-sm text-slate-400 mt-1">{album.artistaNome}</p>
+                  </div>
+                  {usuario && (
+                    <div className="flex shrink-0 gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50"
+                        onClick={() => abrirEdicao(album)}
+                        aria-label="Editar álbum"
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-slate-400 hover:text-red-400 hover:bg-slate-700/50"
+                        onClick={() => handleDeletarAlbum(album.id)}
+                        aria-label="Excluir álbum"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))
