@@ -1,10 +1,39 @@
-# SEPLAG - Sistema de Álbuns Musicais
+# SEPLAG/MT - Sistema de Álbuns Musicais
 
-Aplicação Full Stack para gerenciamento de artistas e álbuns musicais, com armazenamento de capas em MinIO.
+**Edital nº 397** | Secretaria de Estado de Planejamento e Gestão - Mato Grosso
 
-**Candidato:** Carlos Daniel Alves Dias
-**Inscrição:** 068174***-**
-**Vaga:** Full Stack Sênior - Java + React
+---
+
+## Identificação do Candidato
+
+| Campo | Valor |
+|-------|-------|
+| **Candidato** | Carlos Daniel Alves Dias |
+| **Inscrição** | 068174***-** |
+| **Vaga** | Full Stack Sênior - Java + React |
+
+---
+
+## Objetivo do Projeto
+
+Sistema Full Stack para gerenciamento de artistas e álbuns musicais, desenvolvido como prova técnica do processo seletivo. Permite cadastro, edição e exclusão de artistas e álbuns, upload de capas e fotos em armazenamento objeto (MinIO), autenticação JWT, notificações em tempo real via WebSocket e sincronização com API externa de regionais.
+
+---
+
+## Tecnologias Utilizadas
+
+| Tecnologia | Versão | Uso |
+|------------|--------|-----|
+| Java | 17 | Backend |
+| Spring Boot | 3.5 | API REST |
+| Node.js | 18+ | Build frontend |
+| React | 19 | Interface |
+| TypeScript | 5.x | Tipagem frontend |
+| PostgreSQL | 15 | Banco de dados |
+| MinIO | - | Armazenamento S3-compatível |
+| Docker / Docker Compose | - | Orquestração |
+| Tailwind CSS | - | Estilização |
+| RxJS | - | Reatividade (BehaviorSubject) |
 
 ---
 
@@ -89,13 +118,17 @@ flowchart TB
 
 ---
 
-## Como Executar
+## Instruções de Instalação e Execução
 
-### Com Docker (recomendado)
+### Opção A: Com Docker (recomendado)
 
-```bash
-docker compose up -d --build
-```
+1. Certifique-se de ter Docker e Docker Compose instalados.
+2. No diretório raiz do projeto, execute:
+   ```bash
+   docker compose up -d --build
+   ```
+3. Aguarde a inicialização dos serviços (cerca de 1–2 minutos).
+4. Acesse o frontend em http://localhost:3000 e a API em http://localhost:8080.
 
 | Serviço | URL | Porta |
 |---------|-----|-------|
@@ -105,11 +138,12 @@ docker compose up -d --build
 | MinIO Console | http://localhost:9001 | 9001 |
 | PostgreSQL | localhost:5432 | 5432 |
 
-### Execução local
+### Opção B: Execução local
 
-1. Subir Postgres e MinIO: `docker compose up -d postgres minio`
+1. Subir apenas Postgres e MinIO: `docker compose up -d postgres minio`
 2. Backend: `cd backend && ./mvnw spring-boot:run` (ou `mvnw.cmd` no Windows)
 3. Frontend: `cd frontend && npm install && npm run dev`
+4. Acesse o frontend em http://localhost:3000 (ou porta indicada pelo Vite).
 
 ---
 
@@ -185,7 +219,7 @@ Após a primeira execução (migrations aplicadas):
 
 ---
 
-## O que foi implementado
+## Requisitos Atendidos
 
 ### Backend
 - [x] CRUD artistas e álbuns (POST, PUT, GET)
@@ -239,3 +273,9 @@ carlosdanielalvesdias068174/
 ├── docker-compose.yml
 └── README.md
 ```
+
+---
+
+## Observações
+
+Este projeto foi desenvolvido para o processo seletivo da SEPLAG/MT (Edital nº 397). O código é de uso exclusivo para avaliação técnica. Documentação autocontida: todas as informações necessárias para execução e avaliação estão neste README.
