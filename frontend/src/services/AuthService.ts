@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import api from '../utils/api';
+import api, { cachedGet } from '../utils/api';
 import type { LoginRequest, RegisterRequest, Usuario } from '@/types/types';
 
 /**
@@ -87,8 +87,8 @@ export class AuthService {
    */
   private async buscarUsuarioAtual(): Promise<Usuario | null> {
     try {
-      const response = await api.get<Usuario>('/usuarios/me');
-      return response.data;
+      const response = await cachedGet<Usuario>('/usuarios/me');
+      return response;
     } catch {
       return null;
     }

@@ -1,4 +1,5 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import { cache } from 'react';
+import axios, { type AxiosInstance, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 import { toast } from 'sonner';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
@@ -139,5 +140,55 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * Função wrapper com cache do React para requisições GET
+ * Evita requisições duplicadas durante o mesmo render
+ */
+export const cachedGet = cache(async <T = unknown>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<T> => {
+  const response = await api.get<T>(url, config);
+  return response.data;
+});
+
+/**
+ * Função wrapper com cache do React para requisições POST
+ * Evita requisições duplicadas durante o mesmo render
+ */
+export const cachedPost = cache(async <T = unknown>(
+  url: string,
+  data?: unknown,
+  config?: AxiosRequestConfig
+): Promise<T> => {
+  const response = await api.post<T>(url, data, config);
+  return response.data;
+});
+
+/**
+ * Função wrapper com cache do React para requisições PUT
+ * Evita requisições duplicadas durante o mesmo render
+ */
+export const cachedPut = cache(async <T = unknown>(
+  url: string,
+  data?: unknown,
+  config?: AxiosRequestConfig
+): Promise<T> => {
+  const response = await api.put<T>(url, data, config);
+  return response.data;
+});
+
+/**
+ * Função wrapper com cache do React para requisições DELETE
+ * Evita requisições duplicadas durante o mesmo render
+ */
+export const cachedDelete = cache(async <T = unknown>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<T> => {
+  const response = await api.delete<T>(url, config);
+  return response.data;
+});
 
 export default api;

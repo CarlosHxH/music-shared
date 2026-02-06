@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import api from '../utils/api';
+import api, { cachedGet } from '../utils/api';
 import type { Album, CapaAlbum, BackendPageResponse } from '../types/types';
 
 const CACHE_TTL_MS = 60_000; // 1 minuto
@@ -89,7 +89,7 @@ export class AlbumFacadeService {
 
     this.carregando$.next(true);
     try {
-      const response = await api.get<BackendPageResponse<Album>>('/albuns', {
+      const response = await cachedGet<BackendPageResponse<Album>>('/albuns', {
         params: {
           page: pagina,
           size: tamanho,
@@ -98,7 +98,7 @@ export class AlbumFacadeService {
         },
       });
 
-      const { content, totalPages } = response.data;
+      const { content, totalPages } = response;
       this.cacheAlbuns.set(key, { data: { content, totalPages }, timestamp: Date.now() });
       this.albuns$.next(content);
       this.pagina$.next(pagina);
@@ -134,7 +134,7 @@ export class AlbumFacadeService {
 
     this.carregando$.next(true);
     try {
-      const response = await api.get<BackendPageResponse<Album>>(
+      const response = await cachedGet<BackendPageResponse<Album>>(
         `/albuns/artista/${artistaId}`,
         {
           params: {
@@ -146,7 +146,7 @@ export class AlbumFacadeService {
         }
       );
 
-      const { content, totalPages } = response.data;
+      const { content, totalPages } = response;
       this.cacheAlbuns.set(key, { data: { content, totalPages }, timestamp: Date.now() });
       this.albuns$.next(content);
       this.pagina$.next(pagina);
@@ -172,8 +172,7 @@ export class AlbumFacadeService {
 
     this.carregando$.next(true);
     try {
-      const response = await api.get<Album>(`/albuns/${id}`);
-      const album = response.data;
+      const album = await cachedGet<Album>(`/albuns/${id}`);
       this.cacheAlbumById.set(id, { data: album, timestamp: Date.now() });
       this.selecionado$.next(album);
       return album;
@@ -293,10 +292,10 @@ export class AlbumFacadeService {
    */
   async obterUrlCapa(albumId: number, capaId: number): Promise<string> {
     try {
-      const response = await api.get<{ url: string }>(
+      const response = await cachedGet<{ url: string }>(
         `/albuns/${albumId}/capa/${capaId}/presigned-url`
       );
-      return response.data.url;
+      return response.url;
     } catch (error) {
       console.error('Erro ao obter URL da capa:', error);
       throw error;

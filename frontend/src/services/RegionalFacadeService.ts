@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import api from '@/utils/api';
+import api, { cachedGet } from '@/utils/api';
 import type { Regional } from '@/types/types';
 
 /**
@@ -30,8 +30,8 @@ export class RegionalFacadeService {
   async carregarRegionais(): Promise<void> {
     this.carregando$.next(true);
     try {
-      const response = await api.get<Regional[]>('/regionais');
-      this.regionais$.next(response.data);
+      const response = await cachedGet<Regional[]>('/regionais');
+      this.regionais$.next(response);
       this.ultimaSincronizacao$.next(new Date());
     } catch (error) {
       console.error('Erro ao carregar regionais:', error);

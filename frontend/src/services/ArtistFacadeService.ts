@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import api from '@/utils/api';
+import api, { cachedGet } from '@/utils/api';
 import type { Artista, PaginatedResponse, TipoArtista } from '@/types/types';
 
 const CACHE_TTL_MS = 60_000; // 1 minuto
@@ -95,7 +95,7 @@ export class ArtistFacadeService {
 
     this.carregando$.next(true);
     try {
-      const response = await api.get<PaginatedResponse<Artista>>('/artistas', {
+      const response = await cachedGet<PaginatedResponse<Artista>>('/artistas', {
         params: {
           page: pagina,
           size: tamanho,
@@ -106,7 +106,7 @@ export class ArtistFacadeService {
         },
       });
 
-      const { content, totalPages } = response.data;
+      const { content, totalPages } = response;
       this.cacheArtistas.set(key, { data: { content, totalPages }, timestamp: Date.now() });
       this.artistas$.next(content);
       this.pagina$.next(pagina);
@@ -135,8 +135,7 @@ export class ArtistFacadeService {
 
     this.carregando$.next(true);
     try {
-      const response = await api.get<Artista>(`/artistas/${id}`);
-      const artista = response.data;
+      const artista = await cachedGet<Artista>(`/artistas/${id}`);
       this.cacheArtistaById.set(id, { data: artista, timestamp: Date.now() });
       this.selecionado$.next(artista);
       return artista;
@@ -252,9 +251,9 @@ export class ArtistFacadeService {
    */
   async obterUrlFotoArtista(id: number): Promise<string | null> {
     try {
-      const response = await api.get<{ url: string }>(`/artistas/${id}/foto/presigned-url`);
-      return response.data.url;
-    } catch (error) {
+      const response = await cachedGet<{ url: string }>(`/artistas/${id}/foto/presigned-url`);
+      return response.url;
+    } catch {
       console.debug('Artista sem foto');
       return null;
     }
