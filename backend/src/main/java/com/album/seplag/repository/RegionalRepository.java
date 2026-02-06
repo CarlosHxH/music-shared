@@ -9,7 +9,5 @@ import java.util.Optional;
 @Repository
 public interface RegionalRepository extends JpaRepository<Regional, Long> {
     Optional<Regional> findByNome(String nome);
-
-    Optional<Regional> findByExternalId(Long externalId);
 }
 

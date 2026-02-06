@@ -76,7 +76,6 @@ flowchart TB
 - `albuns` → `artistas` (N:1)
 - `albuns` → `usuarios` (quem cadastrou)
 - `capas_album` → `albuns` (N:1)
-- `regionais` possui `external_id` para sync com endpoint externo
 
 ---
 
