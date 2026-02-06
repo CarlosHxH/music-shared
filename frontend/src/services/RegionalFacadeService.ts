@@ -48,8 +48,15 @@ export class RegionalFacadeService {
     this.carregando$.next(true);
     try {
       const response = await api.post<Regional[]>('/regionais/sincronizar', {});
-      this.regionais$.next(response.data);
-      this.ultimaSincronizacao$.next(new Date());
+      // Garante que response.data é um array antes de atualizar o estado
+      if (Array.isArray(response.data)) {
+        this.regionais$.next(response.data);
+        this.ultimaSincronizacao$.next(new Date());
+      } else {
+        // Se não for array, recarrega a lista
+        console.warn('Resposta de sincronização não é um array, recarregando lista...');
+        await this.carregarRegionais();
+      }
     } catch (error) {
       console.error('Erro ao sincronizar regionais:', error);
       throw error;

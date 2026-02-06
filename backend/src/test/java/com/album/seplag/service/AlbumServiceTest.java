@@ -2,6 +2,7 @@ package com.album.seplag.service;
 
 import com.album.seplag.dto.AlbumDTO;
 import com.album.seplag.dto.CapaAlbumDTO;
+import com.album.seplag.dto.PresignedUrlResponse;
 import com.album.seplag.exception.ResourceNotFoundException;
 import com.album.seplag.model.Album;
 import com.album.seplag.model.Artista;
@@ -144,6 +145,9 @@ class AlbumServiceTest {
         capa.setAlbum(album);
 
         when(minIOService.uploadCapa(1L, file)).thenReturn(capa);
+        // Mock do getPresignedUrl que é chamado em toCapaDTO
+        when(minIOService.getPresignedUrl(1L, 1L))
+                .thenReturn(new PresignedUrlResponse("/api/v1/albuns/1/capa/1/image", 1800000L));
 
         List<CapaAlbumDTO> result = albumService.uploadCapas(1L, new MultipartFile[]{file});
 
@@ -152,6 +156,7 @@ class AlbumServiceTest {
         assertEquals(1L, result.get(0).id());
         assertEquals("albuns/1/uuid_capa.jpg", result.get(0).nomeArquivo());
         verify(minIOService).uploadCapa(1L, file);
+        verify(minIOService).getPresignedUrl(1L, 1L);
     }
 }
 

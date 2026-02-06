@@ -1,13 +1,65 @@
+# Stage 1: Build
 FROM node:20-alpine AS build
+
+# Labels de build
+LABEL stage="build"
+
 WORKDIR /app
+
+# Copiar apenas arquivos de dependências primeiro (melhor cache)
 COPY package*.json ./
-RUN npm ci
+
+# Instalar todas as dependências (incluindo devDependencies para build)
+RUN npm ci --ignore-scripts && \
+    npm cache clean --force
+
+# Copiar código fonte
 COPY . .
-RUN npm run build
 
+# Build da aplicação
+RUN npm run build && \
+    rm -rf node_modules && \
+    rm -rf .next .nuxt .cache
+
+# Stage 2: Runtime
 FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
 
+# Labels de segurança e metadados
+LABEL maintainer="SEPLAG Team" \
+      description="Frontend React Application" \
+      version="1.0" \
+      security.scan="enabled"
+
+# Configurar permissões e segurança do nginx
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d && \
+    chmod -R 755 /usr/share/nginx/html && \
+    chmod -R 755 /var/cache/nginx && \
+    chmod -R 755 /var/log/nginx
+
+# Copiar arquivos buildados
+COPY --from=build --chown=nginx:nginx /app/dist /usr/share/nginx/html
+
+# Copiar configuração do nginx
+COPY --chown=nginx:nginx nginx.conf /etc/nginx/conf.d/default.conf
+
+# Remover arquivos desnecessários e limpar cache
+RUN rm -rf /var/cache/apk/* /tmp/* /var/tmp/* && \
+    find /usr/share/nginx/html -name "*.map" -delete && \
+    find /usr/share/nginx/html -name "*.txt" ! -name "robots.txt" -delete
+
+# Configurações de segurança do nginx (ocultar versão)
+RUN sed -i 's/# server_tokens off;/server_tokens off;/' /etc/nginx/nginx.conf || \
+    sed -i '/^http {/a\    server_tokens off;' /etc/nginx/nginx.conf
+
+# Expor porta
+EXPOSE 80
+
+# Healthcheck integrado
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+
+# Executar nginx
+CMD ["nginx", "-g", "daemon off;"]

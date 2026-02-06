@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.album.seplag.config.TestSecurityConfig;
 import com.album.seplag.dto.UsuarioCreateDTO;
 import com.album.seplag.dto.UsuarioUpdateDTO;
 import com.album.seplag.model.Usuario;
@@ -29,9 +31,10 @@ import com.album.seplag.repository.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @Transactional
+ @Import(TestSecurityConfig.class)
 class UsuarioIntegrationTest {
 
     @Autowired
