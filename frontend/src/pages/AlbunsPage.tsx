@@ -19,6 +19,7 @@ import {
 import AlbumCardSkeleton from '@/components/common/AlbumCardSkeleton';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FileInput } from '@/components/ui/file-input';
 
 const SORT_OPTIONS = [
   { value: 'titulo', label: 'Título' },
@@ -247,16 +248,13 @@ export default function AlbunsPage() {
             />
           </div>
           <div>
-            <Label htmlFor="capas-album" className="text-slate-300">
-              {editingAlbum ? 'Adicionar ou alterar capas (png/jpg)' : 'Capas (png/jpg, opcional)'}
-            </Label>
-            <input
+            <FileInput
               id="capas-album"
-              type="file"
+              label={editingAlbum ? 'Adicionar ou alterar capas (png/jpg)' : 'Capas (png/jpg, opcional)'}
               accept="image/*"
               multiple
-              onChange={(e) => setSelectedFiles(Array.from(e.target.files || []))}
-              className="mt-1 w-full text-sm text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-600 file:text-white file:cursor-pointer hover:file:bg-slate-500"
+              onChange={(files) => setSelectedFiles(files ? (Array.isArray(files) ? files : [files]) : [])}
+              placeholder="Arraste capas aqui ou clique para selecionar"
             />
             <ImagePreviewGrid
               items={[

@@ -12,6 +12,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FileInput } from '@/components/ui/file-input';
 
 const SORT_OPTIONS = [
   { value: 'nome', label: 'Nome' },
@@ -168,13 +169,13 @@ export function HomePage() {
               />
             </div>
             <div>
-              <Label htmlFor="foto-artista" className="text-slate-300">Foto (opcional)</Label>
-              <input
+              <FileInput
+                key={fotoNovo ? 'has-file' : 'no-file'}
                 id="foto-artista"
-                type="file"
+                label="Foto (opcional)"
                 accept="image/*"
-                onChange={(e) => setFotoNovo(e.target.files?.[0] ?? null)}
-                className="mt-1 w-full text-sm text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-600 file:text-white file:cursor-pointer hover:file:bg-slate-500"
+                onChange={(files) => setFotoNovo(files && !Array.isArray(files) ? files : null)}
+                placeholder="Arraste uma foto aqui ou clique para selecionar"
               />
               {fotoNovo && (
                 <ImagePreviewGrid

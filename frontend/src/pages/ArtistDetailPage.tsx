@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { showApiErrorToast } from '@/lib/errorUtils';
+import { FileInput } from '@/components/ui/file-input';
 
 /**
  * Página de Detalhe do Artista
@@ -269,13 +270,12 @@ export default function ArtistDetailPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-slate-300">Capas (png/jpg)</label>
-              <input
-                type="file"
+              <FileInput
+                label="Capas (png/jpg)"
                 accept="image/*"
                 multiple
-                onChange={(e) => setSelectedFiles(Array.from(e.target.files || []))}
-                className="mt-1 w-full text-sm text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-600 file:text-white file:cursor-pointer hover:file:bg-slate-500"
+                onChange={(files) => setSelectedFiles(files ? (Array.isArray(files) ? files : [files]) : [])}
+                placeholder="Arraste capas aqui ou clique para selecionar"
               />
               <ImagePreviewGrid
                 items={[
@@ -371,12 +371,12 @@ export default function ArtistDetailPage() {
               </div>
 
               <div>
-                <label className="block text-sm text-slate-300">Foto</label>
-                <input
-                  type="file"
+                <FileInput
+                  key={selectedFotoFile ? 'has-file' : 'no-file'}
+                  label="Foto"
                   accept="image/*"
-                  onChange={(e) => setSelectedFotoFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
-                  className="mt-1 w-full text-sm text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-600 file:text-white file:cursor-pointer hover:file:bg-slate-500"
+                  onChange={(files) => setSelectedFotoFile(files && !Array.isArray(files) ? files : null)}
+                  placeholder="Arraste uma foto aqui ou clique para selecionar"
                 />
                 <ImagePreviewGrid
                   items={[
