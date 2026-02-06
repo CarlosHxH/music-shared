@@ -142,15 +142,31 @@ h1 {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Sidebar - cores slate para combinar com o tema dark */
+/* Sidebar - tema dark consistente (slate + emerald) */
 .dark [data-sidebar="sidebar"] {
-  background-color: rgb(15 23 42);
-  color: rgb(248 250 252);
+  background: linear-gradient(180deg, rgb(15 23 42) 0%, rgb(2 6 23) 100%);
+  color: rgb(226 232 240);
+  border-color: rgb(30 41 59);
 }
-.dark [data-sidebar="sidebar"] [data-sidebar="menu-button"]:hover,
-.dark [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"] {
+.dark [data-sidebar="sidebar"] [data-sidebar="header"] {
+  border-color: rgb(51 65 85);
+  background-color: rgb(15 23 42 / 80%);
+}
+.dark [data-sidebar="sidebar"] [data-sidebar="menu-button"] {
+  color: rgb(148 163 184);
+}
+.dark [data-sidebar="sidebar"] [data-sidebar="menu-button"]:hover {
   background-color: rgb(30 41 59);
   color: rgb(248 250 252);
+}
+.dark [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"] {
+  background-color: rgb(6 95 70 / 35%);
+  color: rgb(110 231 183);
+  box-shadow: inset 3px 0 0 rgb(16 185 129);
+}
+.dark [data-sidebar="sidebar"] [data-sidebar="footer"] {
+  border-color: rgb(51 65 85);
+  background-color: rgb(2 6 23 / 60%);
 }
 .dark [data-sidebar="sidebar"] [data-sidebar="separator"] {
   background-color: rgb(51 65 85);
