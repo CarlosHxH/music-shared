@@ -1,6 +1,6 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import api from '@/utils/api';
-import type { Artista, PaginatedResponse } from '@/models/types';
+import type { Artista, PaginatedResponse } from '@/types/types';
 
 /**
  * Facade Service para Artistas
@@ -44,7 +44,8 @@ export class ArtistFacadeService {
     pagina: number = 0,
     tamanho: number = 10,
     nome?: string,
-    ordenacao?: 'ASC' | 'DESC'
+    ordenacao?: 'ASC' | 'DESC',
+    sort: string = 'nome'
   ): Promise<void> {
     this.carregando$.next(true);
     try {
@@ -53,7 +54,7 @@ export class ArtistFacadeService {
           page: pagina,
           size: tamanho,
           nome: nome || undefined,
-          sort: 'nome',
+          sort,
           direction: ordenacao || 'ASC',
         },
       });

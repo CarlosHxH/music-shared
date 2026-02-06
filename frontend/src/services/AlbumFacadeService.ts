@@ -1,6 +1,6 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import api from '../utils/api';
-import type { Album, CapaAlbum, PaginatedResponse } from '../models/types';
+import type { Album, CapaAlbum, BackendPageResponse } from '../types/types';
 
 /**
  * Facade Service para Álbuns
@@ -36,21 +36,57 @@ export class AlbumFacadeService {
   }
 
   /**
-   * Carrega álbuns de um artista com paginação
+   * Carrega todos os álbuns com paginação e ordenação
+   */
+  async carregarAlbuns(
+    pagina: number = 0,
+    tamanho: number = 12,
+    sort: string = 'id',
+    direction: 'ASC' | 'DESC' = 'ASC'
+  ): Promise<void> {
+    this.carregando$.next(true);
+    try {
+      const response = await api.get<BackendPageResponse<Album>>('/albuns', {
+        params: {
+          page: pagina,
+          size: tamanho,
+          sort,
+          direction,
+        },
+      });
+
+      this.albuns$.next(response.data.content);
+      this.pagina$.next(pagina);
+      this.tamanho$.next(tamanho);
+      this.totalPaginas$.next(response.data.totalPages);
+    } catch (error) {
+      console.error('Erro ao carregar álbuns:', error);
+      throw error;
+    } finally {
+      this.carregando$.next(false);
+    }
+  }
+
+  /**
+   * Carrega álbuns de um artista com paginação e ordenação
    */
   async carregarAlbunsPorArtista(
     artistaId: number,
     pagina: number = 0,
-    tamanho: number = 10
+    tamanho: number = 10,
+    sort: string = 'id',
+    direction: 'ASC' | 'DESC' = 'ASC'
   ): Promise<void> {
     this.carregando$.next(true);
     try {
-      const response = await api.get<PaginatedResponse<Album>>(
+      const response = await api.get<BackendPageResponse<Album>>(
         `/albuns/artista/${artistaId}`,
         {
           params: {
             page: pagina,
             size: tamanho,
+            sort,
+            direction,
           },
         }
       );
