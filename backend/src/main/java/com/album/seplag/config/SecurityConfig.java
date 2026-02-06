@@ -70,7 +70,8 @@ public class SecurityConfig {
             apiBasePath + "/auth/refresh",
             "/actuator/health/**",
             "/csrf",
-            "/"
+            "/",
+            "/ws/**"  // WebSocket SockJS handshake (SockJS não envia JWT em headers)
         };
     }
 

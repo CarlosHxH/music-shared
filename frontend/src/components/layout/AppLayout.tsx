@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
 import {
   SidebarProvider,
@@ -15,13 +15,14 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Music2, Disc3, Globe, User, LogOut } from 'lucide-react';
+import { Music2, Disc3, Globe, User, LogOut, Zap } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { webSocketService } from '@/services/WebSocketService';
 import { artistFacadeService } from '@/services/ArtistFacadeService';
 import { albumFacadeService } from '@/services/AlbumFacadeService';
 import { toast } from 'sonner';
+import api from '@/utils/api';
 
 const navItems = [
   { to: '/artistas', label: 'Artistas', icon: Music2 },
@@ -36,18 +37,20 @@ const navItems = [
  */
 export function AppLayout() {
   const { user, logout } = useAuth();
+  const [testandoWs, setTestandoWs] = useState(false);
 
   useEffect(() => {
     if (user) {
       webSocketService.conectar();
       const sub = webSocketService.obterNotificacoes().subscribe((notif) => {
-        if (notif?.message) {
+        if (!notif) return;
+        if (notif.message) {
           toast.info(notif.message, { duration: 5000 });
         }
-        if (notif?.type?.startsWith('ARTISTA_')) {
+        if (notif.type?.startsWith('ARTISTA_')) {
           artistFacadeService.invalidarCache();
         }
-        if (notif?.type?.startsWith('ALBUM_')) {
+        if (notif.type?.startsWith('ALBUM_')) {
           albumFacadeService.invalidarCache();
         }
       });
@@ -91,14 +94,43 @@ export function AppLayout() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="border-t border-slate-700 p-4 bg-slate-950/40">
+        <SidebarFooter className="border-t border-slate-700 p-4 bg-slate-950/40 space-y-1">
           {user && (
-            <Link
-              to="/perfil"
-              className="block px-2 py-2 text-slate-400 text-sm truncate group-data-[collapsible=icon]:hidden hover:text-emerald-400 transition-colors rounded-md"
-            >
-              {user.username}
-            </Link>
+            <>
+              <Link
+                to="/perfil"
+                className="block px-2 py-2 text-slate-400 text-sm truncate group-data-[collapsible=icon]:hidden hover:text-emerald-400 transition-colors rounded-md"
+              >
+                {user.username}
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start gap-2 text-slate-400 hover:bg-slate-700/50 hover:text-emerald-400/90 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:justify-center rounded-md"
+                onClick={async () => {
+                  setTestandoWs(true);
+                  try {
+                    await api.post('/test/websocket');
+                    const conectado = webSocketService.estaConectado();
+                    toast.success(
+                      conectado
+                        ? 'Teste enviado! O toast de notificação deve aparecer em instantes.'
+                        : 'Backend enviou a notificação, mas o WebSocket não está conectado. Verifique o console (F12) para [WebSocket].'
+                    );
+                  } catch {
+                    toast.error('Falha ao testar WebSocket. Verifique se o backend está rodando.');
+                  } finally {
+                    setTestandoWs(false);
+                  }
+                }}
+                disabled={testandoWs}
+              >
+                <Zap className="size-4 shrink-0" />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  {testandoWs ? 'Enviando...' : 'Testar WebSocket'}
+                </span>
+              </Button>
+            </>
           )}
           <Button
             variant="ghost"
