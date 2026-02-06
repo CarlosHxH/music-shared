@@ -10,7 +10,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Runtime
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 # Labels de segurança e metadados
 LABEL maintainer="SEPLAG Team" \
@@ -18,10 +18,12 @@ LABEL maintainer="SEPLAG Team" \
       version="1.0" \
       security.scan="enabled"
 
-# Instalar apenas ferramentas essenciais para healthcheck e remover após uso
-RUN apk add --no-cache wget && \
-    addgroup -S springboot && \
-    adduser -S springboot -G springboot && \
+# Instalar apenas ferramentas essenciais para healthcheck
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends wget && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -r springboot && \
+    useradd -r -g springboot springboot && \
     mkdir -p /app && \
     chown -R springboot:springboot /app
 
@@ -31,7 +33,7 @@ WORKDIR /app
 COPY --from=build --chown=springboot:springboot /app/target/*.jar app.jar
 
 # Limpar cache e arquivos temporários
-RUN rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
+RUN rm -rf /tmp/* /var/tmp/*
 
 # Mudar para usuário não-root
 USER springboot
