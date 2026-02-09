@@ -52,6 +52,9 @@ RUN chown -R nginx:nginx /usr/share/nginx/html && \
 # Copiar arquivos buildados
 COPY --from=build --chown=nginx:nginx /app/dist /usr/share/nginx/html
 
+# Instalar gettext (contém envsubst) para processar templates
+RUN apk add --no-cache gettext
+
 # Copiar configuração do nginx como template (será processado pelo script de entrada)
 COPY --chown=nginx:nginx nginx.conf /etc/nginx/templates/default.conf.template
 
@@ -60,7 +63,13 @@ RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
     echo 'set -e' >> /docker-entrypoint.sh && \
     echo 'export BACKEND_HOST="${BACKEND_HOST:-backend}"' >> /docker-entrypoint.sh && \
     echo 'export BACKEND_PORT="${BACKEND_PORT:-8080}"' >> /docker-entrypoint.sh && \
+    echo 'echo "=== Configurando Nginx ==="' >> /docker-entrypoint.sh && \
+    echo 'echo "BACKEND_HOST=${BACKEND_HOST}"' >> /docker-entrypoint.sh && \
+    echo 'echo "BACKEND_PORT=${BACKEND_PORT}"' >> /docker-entrypoint.sh && \
     echo 'envsubst '"'"'$$BACKEND_HOST $$BACKEND_PORT'"'"' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf' >> /docker-entrypoint.sh && \
+    echo 'echo "=== Nginx configurado ==="' >> /docker-entrypoint.sh && \
+    echo 'cat /etc/nginx/conf.d/default.conf | grep proxy_pass' >> /docker-entrypoint.sh && \
+    echo 'echo "=== Iniciando Nginx ==="' >> /docker-entrypoint.sh && \
     echo 'exec nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
     chmod +x /docker-entrypoint.sh
 
