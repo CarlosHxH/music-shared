@@ -47,10 +47,10 @@ services:
       JWT_SECRET: ${JWT_SECRET:-seplag-secret-key-change-in-production}
       JWT_EXPIRATION: 300000
 
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000,http://sokoc8cc80wwc8wgoswgg8gw.37.27.45.54.sslip.io:3000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000,http://sokoc8cc80wwc8wgoswgg8gw.37.27.45.54.sslip.io:3000,localhost:3000}
 
     ports:
-      - "${BACKEND_PORT:-8085}:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health/liveness || exit 1"]
       interval: 30s

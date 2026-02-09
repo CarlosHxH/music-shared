@@ -42,12 +42,8 @@ public class SwaggerConfig {
 
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8080")
-                                .description("Servidor Local"),
-
-                        new Server()
-                                .url("http://backend:8080")
-                                .description("Servidor Docker")))
+                                .url("/")
+                                .description("Servidor Atual")))
 
                 .components(new Components());
     }
