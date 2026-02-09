@@ -70,6 +70,12 @@ services:
         VITE_API_URL: /api/v1
         VITE_WS_URL: /ws
         VITE_MINIO_ENDPOINT: http://localhost:9000
+    environment:
+      # Variáveis para o nginx template substituir no proxy_pass
+      # BACKEND_HOST: nome do serviço backend na rede Docker (padrão: "backend")
+      # BACKEND_PORT: porta interna do container backend (sempre 8080, independente da porta externa mapeada)
+      BACKEND_HOST: ${BACKEND_HOST:-backend}
+      BACKEND_PORT: ${BACKEND_INTERNAL_PORT:-8080}
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
