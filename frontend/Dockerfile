@@ -47,13 +47,18 @@ RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chown -R nginx:nginx /etc/nginx/conf.d && \
     chmod -R 755 /usr/share/nginx/html && \
     chmod -R 755 /var/cache/nginx && \
-    chmod -R 755 /var/log/nginx
+    chmod -R 755 /var/log/nginx && \
+    mkdir -p /etc/nginx/templates
 
 # Copiar arquivos buildados
 COPY --from=build --chown=nginx:nginx /app/dist /usr/share/nginx/html
 
-# Copiar configuração do nginx
-COPY --chown=nginx:nginx nginx.conf /etc/nginx/conf.d/default.conf
+# Copiar template do nginx (será processado pelo entrypoint com envsubst)
+COPY --chown=nginx:nginx nginx.conf.template /etc/nginx/templates/default.conf.template
+
+# Copiar entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 # Remover arquivos desnecessários e limpar cache
 RUN rm -rf /var/cache/apk/* /tmp/* /var/tmp/* && \
@@ -64,6 +69,10 @@ RUN rm -rf /var/cache/apk/* /tmp/* /var/tmp/* && \
 RUN sed -i 's/# server_tokens off;/server_tokens off;/' /etc/nginx/nginx.conf || \
     sed -i '/^http {/a\    server_tokens off;' /etc/nginx/nginx.conf
 
+# Variáveis de ambiente padrão para o backend (podem ser sobrescritas no docker-compose/Coolify)
+ENV BACKEND_HOST=backend
+ENV BACKEND_PORT=8080
+
 # Expor porta
 EXPOSE 80
 
@@ -71,5 +80,5 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
 
-# Executar nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Usar entrypoint customizado que processa o template antes de iniciar o nginx
+ENTRYPOINT ["/docker-entrypoint.sh"]

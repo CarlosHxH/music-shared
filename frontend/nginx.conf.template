@@ -7,7 +7,7 @@ server {
     # Aumentar tamanho máximo de upload
     client_max_body_size 50M;
 
-    # Resolver DNS do Docker
+    # Resolver DNS do Docker (resolve hostnames em runtime, não só na inicialização)
     resolver 127.0.0.11 valid=10s ipv6=off;
 
     location / {
@@ -15,7 +15,8 @@ server {
     }
 
     location /api {
-        set $upstream_backend http://backend:8080;
+        # Usar variável força resolução DNS a cada request (padrão Docker)
+        set $upstream_backend http://${BACKEND_HOST}:${BACKEND_PORT};
         proxy_pass $upstream_backend;
 
         proxy_set_header Host $host;
@@ -24,12 +25,14 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Origin $http_origin;
 
+        # Configurações para streaming de arquivos binários (imagens)
         proxy_buffering off;
         proxy_request_buffering off;
         proxy_read_timeout 300s;
         proxy_connect_timeout 75s;
         proxy_send_timeout 300s;
 
+        # Deixar o backend gerenciar os headers de CORS
         proxy_pass_header Access-Control-Allow-Origin;
         proxy_pass_header Access-Control-Allow-Credentials;
         proxy_pass_header Access-Control-Allow-Methods;
@@ -37,7 +40,7 @@ server {
     }
 
     location /ws {
-        set $upstream_ws http://backend:8080;
+        set $upstream_ws http://${BACKEND_HOST}:${BACKEND_PORT};
         proxy_pass $upstream_ws;
 
         proxy_http_version 1.1;
@@ -49,6 +52,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Origin $http_origin;
 
+        # Timeouts para WebSocket
         proxy_read_timeout 3600s;
         proxy_send_timeout 3600s;
         proxy_connect_timeout 75s;
