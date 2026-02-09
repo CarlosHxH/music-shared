@@ -75,7 +75,7 @@ services:
       # BACKEND_HOST: nome do serviço backend na rede Docker (padrão: "backend")
       # BACKEND_PORT: porta interna do container backend (sempre 8989, independente da porta externa mapeada)
       BACKEND_HOST: ${BACKEND_HOST:-backend}
-      BACKEND_PORT: ${BACKEND_INTERNAL_PORT:-8989}
+      BACKEND_PORT: ${BACKEND_PORT:-8989}
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
