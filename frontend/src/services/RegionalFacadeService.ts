@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import api from '@/utils/api';
+import api, { cachedGet } from '@/utils/api';
 import type { Regional } from '@/types/types';
 
 /**
@@ -30,8 +30,8 @@ export class RegionalFacadeService {
   async carregarRegionais(): Promise<void> {
     this.carregando$.next(true);
     try {
-      const response = await api.get<Regional[]>('/regionais');
-      this.regionais$.next(response.data);
+      const response = await cachedGet<Regional[]>('/regionais');
+      this.regionais$.next(response);
       this.ultimaSincronizacao$.next(new Date());
     } catch (error) {
       console.error('Erro ao carregar regionais:', error);
@@ -48,8 +48,15 @@ export class RegionalFacadeService {
     this.carregando$.next(true);
     try {
       const response = await api.post<Regional[]>('/regionais/sincronizar', {});
-      this.regionais$.next(response.data);
-      this.ultimaSincronizacao$.next(new Date());
+      // Garante que response.data é um array antes de atualizar o estado
+      if (Array.isArray(response.data)) {
+        this.regionais$.next(response.data);
+        this.ultimaSincronizacao$.next(new Date());
+      } else {
+        // Se não for array, recarrega a lista
+        console.warn('Resposta de sincronização não é um array, recarregando lista...');
+        await this.carregarRegionais();
+      }
     } catch (error) {
       console.error('Erro ao sincronizar regionais:', error);
       throw error;

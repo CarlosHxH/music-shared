@@ -76,7 +76,17 @@ public class RegionalService {
             logger.info("Sincronização de regionais concluída");
         } catch (Exception e) {
             logger.error("Erro ao sincronizar regionais", e);
+            throw new RuntimeException("Erro ao sincronizar regionais", e);
         }
+    }
+    
+    /**
+     * Sincroniza regionais e retorna a lista atualizada
+     */
+    @Transactional
+    public List<RegionalDTO> sincronizarERetornar() {
+        sincronizarRegionais();
+        return findAll();
     }
 
     private String extrairNome(Map<String, Object> map) {

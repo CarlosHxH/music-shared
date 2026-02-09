@@ -1,7 +1,6 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: seplag-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-seplag_db}
       POSTGRES_USER: ${POSTGRES_USER:-seplag_user}
@@ -20,7 +19,6 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: seplag-minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
@@ -31,54 +29,45 @@ services:
     volumes:
       - minio_data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9000/minio/health/live || exit 1"]
     networks:
       - seplag-network
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    container_name: seplag-backend
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/seplag_db
       SPRING_DATASOURCE_USERNAME: seplag_user
       SPRING_DATASOURCE_PASSWORD: seplag_pass
+
       MINIO_ENDPOINT: http://minio:9000
-      MINIO_PUBLIC_ENDPOINT: http://localhost:9000
-      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_PUBLIC_ENDPOINT: http://minio:9000
+
       JWT_SECRET: ${JWT_SECRET:-seplag-secret-key-change-in-production}
       JWT_EXPIRATION: 300000
-      FRONTEND_URL: http://localhost:3000
+
+      FRONTEND_URL: http://frontend
+
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     depends_on:
       postgres:
         condition: service_healthy
       minio:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health/liveness"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     networks:
       - seplag-network
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    container_name: seplag-frontend
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api/v1}
-      VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:8080/ws}
+      VITE_API_URL: http://backend:8080/api/v1
+      VITE_WS_URL: ws://backend:8080/ws
+      VITE_MINIO_ENDPOINT: http://minio:9000
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       - backend
     networks:
@@ -91,4 +80,3 @@ volumes:
 networks:
   seplag-network:
     driver: bridge
-    
