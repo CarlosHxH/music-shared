@@ -14,8 +14,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - seplag-network
 
   minio:
     image: minio/minio:latest
@@ -34,8 +32,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    networks:
-      - seplag-network
 
   backend:
     build:
@@ -51,7 +47,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-seplag-secret-key-change-in-production}
       JWT_EXPIRATION: 300000
 
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000,http://sspsti263973.seguranca.local:3000,http://sspsti263973:3000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000,http://sokoc8cc80wwc8wgoswgg8gw.37.27.45.54.sslip.io:3000}
 
     ports:
       - "${BACKEND_PORT:-8085}:8080"
@@ -66,8 +62,6 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    networks:
-      - seplag-network
 
   frontend:
     build:
@@ -76,24 +70,12 @@ services:
         VITE_API_URL: /api/v1
         VITE_WS_URL: /ws
         VITE_MINIO_ENDPOINT: http://localhost:9000
-    environment:
-      # Variáveis para o nginx template substituir no proxy_pass
-      # BACKEND_HOST: nome do serviço backend na rede Docker (padrão: "backend")
-      # BACKEND_PORT: porta interna do container backend (sempre 8080, independente da porta externa mapeada)
-      BACKEND_HOST: ${BACKEND_HOST:-backend}
-      BACKEND_PORT: ${BACKEND_PORT:-8080}
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       backend:
         condition: service_healthy
-    networks:
-      - seplag-network
 
 volumes:
   postgres_data:
   minio_data:
-
-networks:
-  seplag-network:
-    driver: bridge

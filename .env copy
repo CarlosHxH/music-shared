@@ -20,10 +20,9 @@ JWT_SECRET=seplag-secret-key-change-in-production
 JWT_EXPIRATION=300000
 
 # --- Frontend (Vite) ---
-# Em Docker: usa /api/v1 (relativo, via nginx proxy)
-# Local: usa http://localhost:8085/api/v1
-VITE_API_URL=/api/v1
-VITE_WS_URL=/ws
+# API: raiz do servidor (sem /api/v1). WebSocket
+VITE_API_URL=http://localhost:8084/api/v1
+VITE_WS_URL=http://localhost:8084/ws/albuns
 
 # --- CORS / Backend ---
-FRONTEND_URL=http://localhost:3000,http://sokoc8cc80wwc8wgoswgg8gw.37.27.45.54.sslip.io:3000
+FRONTEND_URL=http://localhost:3000,http://sspsti263973.seguranca.local:3000,http://sspsti263973.seguranca.local:3000
