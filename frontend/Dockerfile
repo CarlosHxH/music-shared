@@ -4,6 +4,16 @@ FROM node:20-alpine AS build
 # Labels de build
 LABEL stage="build"
 
+# Build args para variáveis de ambiente do Vite
+ARG VITE_API_URL=/api/v1
+ARG VITE_WS_URL=/ws
+ARG VITE_MINIO_ENDPOINT=http://localhost:9000
+
+# Definir como variáveis de ambiente para o build
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_WS_URL=${VITE_WS_URL}
+ENV VITE_MINIO_ENDPOINT=${VITE_MINIO_ENDPOINT}
+
 WORKDIR /app
 
 # Copiar apenas arquivos de dependências primeiro (melhor cache)
