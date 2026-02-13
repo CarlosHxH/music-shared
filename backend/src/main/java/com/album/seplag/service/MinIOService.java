@@ -1,6 +1,7 @@
 package com.album.seplag.service;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MinIOService {
 
     private final MinioClient minioClient;
+    private final MinIOConfig minIOConfig;
     private final String bucketName;
     private final Long presignedUrlExpiration;
     private final AlbumRepository albumRepository;
@@ -45,12 +47,35 @@ public class MinIOService {
                        ArtistaRepository artistaRepository,
                        CapaAlbumRepository capaAlbumRepository) {
         this.minioClient = minIOConfig.minioClient();
+        this.minIOConfig = minIOConfig;
         this.bucketName = bucketName;
         this.presignedUrlExpiration = presignedUrlExpiration;
         this.albumRepository = albumRepository;
         this.artistaRepository = artistaRepository;
         this.capaAlbumRepository = capaAlbumRepository;
         initializeBucket();
+    }
+
+    /**
+     * Reescreve a URL pré-assinada para usar a base pública (ex.: frontend + /minio)
+     * quando minio.public-url está configurado, para o navegador poder carregar a imagem.
+     */
+    private String rewritePresignedUrlForClient(String internalUrl) {
+        String publicUrl = minIOConfig.getPublicUrl();
+        if (publicUrl == null || publicUrl.isBlank()) {
+            return internalUrl;
+        }
+        try {
+            URI uri = URI.create(internalUrl);
+            String path = uri.getPath();
+            String query = uri.getQuery();
+            String pathAndQuery = path + (query != null && !query.isEmpty() ? "?" + query : "");
+            String base = publicUrl.replaceAll("/$", "");
+            return base + pathAndQuery;
+        } catch (Exception e) {
+            log.warn("Erro ao reescrever URL pré-assinada, retornando original: {}", e.getMessage());
+            return internalUrl;
+        }
     }
 
     private void initializeBucket() {
@@ -126,6 +151,7 @@ public class MinIOService {
                             .expiry((int) (presignedUrlExpiration / 1000))
                             .build()
             );
+            url = rewritePresignedUrlForClient(url);
 
             log.debug("URL pré-assinada gerada com sucesso para capa ID: {}", capaId);
             return new PresignedUrlResponse(url, presignedUrlExpiration);
@@ -187,6 +213,7 @@ public class MinIOService {
                             .expiry((int) (presignedUrlExpiration / 1000))
                             .build()
             );
+            url = rewritePresignedUrlForClient(url);
 
             log.debug("URL pré-assinada gerada com sucesso para foto do artista ID: {}", artistaId);
             return new PresignedUrlResponse(url, presignedUrlExpiration);

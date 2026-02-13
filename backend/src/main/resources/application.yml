@@ -43,6 +43,7 @@ minio:
   secret-key: ${MINIO_SECRET_KEY:minioadmin}
   bucket-name: album-covers
   presigned-url-expiration: 1800000
+  public-url: ${MINIO_PUBLIC_URL:}
 
 cors:
   allowed-origin: ${FRONTEND_URL:http://localhost:5173,http://localhost:3000,http://localhost:8082}

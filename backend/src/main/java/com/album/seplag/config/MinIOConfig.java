@@ -17,12 +17,23 @@ public class MinIOConfig {
     @Value("${minio.secret-key}")
     private String secretKey;
 
+    @Value("${minio.public-url:}")
+    private String publicUrl;
+
     @Bean
     public MinioClient minioClient() {
         return MinioClient.builder()
                 .endpoint(endpoint)
                 .credentials(accessKey, secretKey)
                 .build();
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public String getPublicUrl() {
+        return publicUrl != null ? publicUrl : "";
     }
 }
 
